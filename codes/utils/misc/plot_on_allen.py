@@ -2,7 +2,6 @@ import os
 import warnings
 import numpy as np
 import seaborn as sns
-import matplotlib
 import matplotlib.pyplot as plt
 import matplotlib.colors as colors
 from matplotlib.colors import TwoSlopeNorm
