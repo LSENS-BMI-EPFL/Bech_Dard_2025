@@ -76,7 +76,6 @@ def plot_wf_single_frame(frame, title, figure, ax_to_plot, suptitle, saving_path
         ax_to_plot.hlines(25, 25, 25 + scalebar * 3, linewidth=2, color='k')
     else:
         ax_to_plot.hlines(25, 25, 25 + scalebar * 3, linewidth=2, color='white')
-    ax_to_plot.text(50, 100, "3 mm", size=10)
     ax_to_plot.set_title(title)
     figure.colorbar(im, ax=ax_to_plot, location='right', shrink=cbar_shrink)
     figure.set_facecolor('white')
@@ -87,6 +86,8 @@ def plot_wf_single_frame(frame, title, figure, ax_to_plot, suptitle, saving_path
         sns.scatterplot(data=grid, x='ml_wf', y='ap_wf', s=griddotsize, marker='o', facecolor='white', alpha=0.1,
                         edgecolor='grey',
                         ax=ax_to_plot, zorder=1)
+
+    ax_to_plot.set_axis_off()
 
     # Put on subfig for individual image
     if separated_plots:

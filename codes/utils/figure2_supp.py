@@ -1,5 +1,8 @@
 import os
 import json
+import ast
+import itertools
+import scipy
 from codes.utils.misc.stats import *
 import matplotlib.pyplot as plt
 from codes.utils.misc.plot_on_grid import plot_grid_on_allen
@@ -154,4 +157,171 @@ def plot_figure2_supp1cde(muscimol, ringer, saving_path, sites, names, saving_fo
         figure.tight_layout()
         save_fig(figure, saving_path, f'Figure2_supp1{names[idx]}_right', formats=saving_formats)
 
+
+def plot_figure2_supp2a(data_table, saving_path, name, saving_formats):
+    data_table = data_table.loc[data_table.trial_type == 'whisker_trial']
+
+    selected_spots = ['(-1.5, 3.5)', '(-1.5, 4.5)', '(1.5, 1.5)', '(-1.5, 0.5)', '(2.5, 2.5)', '(0.5, 4.5)']
+    contexts = [1, 0]
+    bodyparts = ['whisker_velocity', 'jaw_y', 'tongue_distance']
+    combinations = list(itertools.product(contexts, bodyparts, selected_spots))
+
+    fig, axes = plt.subplots(6, 6, figsize=(15, 9), sharex=True)
+    for ax_idx, ax in enumerate(axes.flatten()):
+        df_subplot = data_table.loc[(data_table.opto_stim_coord == combinations[ax_idx][2]) &
+                                    (data_table.context == combinations[ax_idx][0])].copy()
+        df_subplot[combinations[ax_idx][1]] = df_subplot[combinations[ax_idx][1]].apply(
+            lambda s: np.fromstring(s.strip('[]'), sep=' '))
+        time_vector = np.linspace(-1, 1.5, 250)
+        df_subplot['time'] = [time_vector] * len(df_subplot)
+        df_subplot = df_subplot[['time', 'mouse_id', combinations[ax_idx][1]]]
+        df_long = df_subplot.explode([combinations[ax_idx][1], 'time'], ignore_index=True)
+        if combinations[ax_idx][1] == 'whisker_velocity':
+            df_long[combinations[ax_idx][1]] = np.abs(df_long[combinations[ax_idx][1]])
+        sns.lineplot(df_long, x='time', y=combinations[ax_idx][1], color='royalblue', ax=ax)
+        df_subplot_ctrl = data_table.loc[(data_table.opto_stim_coord == '(-5.0, 5.0)') &
+                                         (data_table.context == combinations[ax_idx][0])].copy()
+        df_subplot_ctrl[combinations[ax_idx][1]] = df_subplot_ctrl[combinations[ax_idx][1]].apply(
+            lambda s: np.fromstring(s.strip('[]'), sep=' '))
+        df_subplot_ctrl['time'] = [time_vector] * len(df_subplot_ctrl)
+        df_subplot_ctrl = df_subplot_ctrl[['time', 'mouse_id', combinations[ax_idx][1]]]
+        df_subplot_ctrl_long = df_subplot_ctrl.explode([combinations[ax_idx][1], 'time'], ignore_index=True)
+        if combinations[ax_idx][1] == 'whisker_velocity':
+            df_subplot_ctrl_long[combinations[ax_idx][1]] = np.abs(df_subplot_ctrl_long[combinations[ax_idx][1]])
+        sns.lineplot(df_subplot_ctrl_long, x='time', y=combinations[ax_idx][1], color='grey', ax=ax)
+        sns.despine()
+        ax.axvline(x=0, ymin=0, ymax=1, linestyle='--', c='k')
+        ax.set_title(f'{"W+" if combinations[ax_idx][0] == 1 else "W-"}\n'
+                     f'{combinations[ax_idx][2]}')
+
+    for ax in axes[0, :].flatten():
+        ax.set_ylim(-0.2, 1.4)
+    for ax in axes[1, :].flatten():
+        ax.set_ylim(-0.16, 2.8)
+    for ax in axes[2, :].flatten():
+        ax.set_ylim(-0.8, 15)
+
+    for ax in axes[3, :].flatten():
+        ax.set_ylim(-0.2, 1.4)
+    for ax in axes[4, :].flatten():
+        ax.set_ylim(-0.2, 2.8)
+    for ax in axes[5, :].flatten():
+        ax.set_ylim(-0.8, 15)
+
+    fig.suptitle(f'Whisker trials')
+    fig.tight_layout()
+
+    save_fig(fig, saving_path, name, formats=saving_formats)
+
+
+def plot_figure2_supp2b(data_table, saving_path, name, saving_formats):
+    data_table = data_table.loc[data_table.trial_type == 'whisker_trial']
+
+    selected_spots = ['(-5.0, 5.0)', '(-1.5, 3.5)', '(-1.5, 4.5)', '(1.5, 1.5)', '(-1.5, 0.5)', '(2.5, 2.5)',
+                      '(0.5, 4.5)']
+    sub_df = data_table.loc[data_table.opto_stim_coord.isin(selected_spots)].copy()
+
+    bodyparts_to_plot = ['whisker_velocity', 'jaw_y', 'tongue_distance']
+    for context in sub_df.context.unique():
+        sub_df_ctx = sub_df.loc[sub_df.context == context].copy()
+        for bpart in bodyparts_to_plot:
+            col_to_keep = [bpart, 'mouse_id', 'context', 'trial_type', 'opto_stim_coord']
+            df_plot = sub_df_ctx[col_to_keep].copy()
+            df_plot[bpart] = df_plot[bpart].apply(lambda s: np.fromstring(s.strip('[]'), sep=' '))
+            time_vector = np.linspace(-1, 1.5, 250)
+            df_plot['time'] = [time_vector] * len(df_plot)
+            auc = []
+            for i in range(len(df_plot)):
+                auc.append(scipy.integrate.simpson(df_plot.iloc[i][bpart][101: 116], np.arange(0, 15)))
+            df_plot[f'auc'] = auc
+
+            fig, ax = plt.subplots(1, 1, figsize=(6, 3))
+            sns.barplot(data=df_plot, x='opto_stim_coord', y='auc', fill=False, color='black', order=selected_spots,
+                        ax=ax)
+            sns.scatterplot(data=df_plot, x='opto_stim_coord', y='auc', color='grey', alpha=0.5, ax=ax)
+            sns.despine()
+            ax.set_ylabel('AUC')
+            ax.set_xlabel('Opto target')
+            ax.set_title(f'{bpart} AUC {"W-" if context == 0 else "W+"}')
+            fig.tight_layout()
+
+            save_fig(fig, saving_path, f'{name}_{bpart}_{"W-" if context == 0 else "W+"}', formats=saving_formats)
+
+            # Stats
+            spot_list = []
+            mean_list = []
+            std_list = []
+            mean_diff = []
+            dprime = []
+            t_values = []
+            p_values = []
+            ctrl_data = df_plot.loc[df_plot.opto_stim_coord == '(-5.0, 5.0)', 'auc'].values
+            for target in selected_spots:
+                data = df_plot.loc[df_plot.opto_stim_coord == target, 'auc'].values
+                spot_list.append(target)
+                mean_list.append(np.nanmean(data))
+                std_list.append(np.nanstd(data))
+                mean_diff.append(np.nanmean(data) - np.nanmean(ctrl_data))
+                if target != '(-5.0, 5.0)':
+                    dprime.append((np.nanmean(data) - np.nanmean(ctrl_data)) / 0.5 * (
+                                np.nanstd(data) ** 2 + np.nanstd(ctrl_data) ** 2))
+                    stat_res = st.ttest_rel(data, ctrl_data)
+                    t_values.append(stat_res[0])
+                    p_values.append(stat_res[1])
+                else:
+                    dprime.append(np.nan)
+                    t_values.append(np.nan)
+                    p_values.append(np.nan)
+            stats_results = pd.DataFrame()
+            stats_results['Spot'] = spot_list
+            stats_results['Mean'] = mean_list
+            stats_results['STD'] = std_list
+            stats_results['MeanDiff'] = mean_diff
+            stats_results['Dprime'] = dprime
+            stats_results['T'] = t_values
+            stats_results['p'] = p_values
+            stats_results['significant'] = stats_results['p'] < 0.05 / 6
+            stats_results.to_csv(
+                os.path.join(saving_path, f'{name}_{bpart}_{"W-" if context == 0 else "W+"}_stat_results.csv'))
+
+
+def plot_figure2_supp2c(data_table, saving_path, name, saving_formats):
+    data_table = data_table.loc[data_table.trial_type == 'whisker_trial']
+
+    bodyparts_to_plot = ['whisker_velocity', 'jaw_y', 'tongue_distance']
+
+    seismic_palette = sns.diverging_palette(265, 10, s=100, l=40, sep=30, n=200, center="light", as_cmap=True)
+
+    for context in data_table.context.unique():
+        sub_df = data_table.loc[data_table.context == context]
+        for bpart in bodyparts_to_plot:
+            col_to_keep = [bpart, 'mouse_id', 'context', 'trial_type', 'opto_stim_coord']
+            df_plot = sub_df[col_to_keep].copy()
+            df_plot[bpart] = df_plot[bpart].apply(lambda s: np.fromstring(s.strip('[]'), sep=' '))
+            time_vector = np.linspace(-1, 1.5, 250)
+            df_plot['time'] = [time_vector] * len(df_plot)
+            auc = []
+            for i in range(len(df_plot)):
+                auc.append(scipy.integrate.simpson(df_plot.iloc[i][bpart][101: 116], np.arange(0, 15)))
+            df_plot[f'auc'] = auc
+            reference = df_plot[df_plot['opto_stim_coord'] == '(-5.0, 5.0)'][['mouse_id', 'auc']].rename(
+                columns={'auc': 'ctrl_auc'})
+            df_plot = df_plot.merge(reference, on='mouse_id', how='left')
+            df_plot[f'delta_auc'] = df_plot[f'auc'] - df_plot[f'ctrl_auc']
+
+            full_avg_df = df_plot.copy().drop(['mouse_id', bpart, 'context', 'trial_type', 'time'], axis=1).groupby(
+                ['opto_stim_coord'], as_index=False).agg(np.nanmean).reset_index()
+            full_avg_df['y'] = full_avg_df['opto_stim_coord'].apply(lambda x: ast.literal_eval(x)[0])
+            full_avg_df['x'] = full_avg_df['opto_stim_coord'].apply(lambda x: ast.literal_eval(x)[1])
+            fig, ax = plt.subplots(1, 1, figsize=(4, 4))
+            plot_grid_on_allen(full_avg_df, outcome='delta_auc', palette=seismic_palette, facecolor=None,
+                               edgecolor=None,
+                               vmin=-(np.max(np.abs(full_avg_df.delta_auc))),
+                               vmax=np.max(np.abs(full_avg_df.delta_auc)), result_path=None, dotsize=420, fig=fig,
+                               ax=ax)
+            ax.set_title(f'{bpart} -  "all_trials"\n'
+                         f'{"W+" if context == 1 else "W-"}')
+            fig.tight_layout()
+
+            save_fig(fig, saving_path, f'{name}_{bpart}_{"W-" if context == 0 else "W+"}', formats=saving_formats)
 

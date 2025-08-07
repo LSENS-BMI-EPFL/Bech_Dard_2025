@@ -6,7 +6,8 @@ from codes.utils.misc.plot_on_allen import plot_wf_avg, plot_wf_single_frame
 from codes.utils.misc.stats import compute_dprime, first_above_threshold_frame
 
 
-def plot_average_wf_timecourse(data, trial_types, saving_path, formats=['png']):
+def plot_average_wf_timecourse(data, trial_types, saving_path, formats=['png'],
+                               scale=(-0.035, 0.035), diff_range=0.015):
     rewarded_idx = np.where(['non-rewarded' not in trial for trial in trial_types])[0]
     rewarded_key = np.array(trial_types)[rewarded_idx].tolist()[0]
     non_rewarded_idx = np.where(['non-rewarded' in trial for trial in trial_types])[0]
@@ -43,7 +44,7 @@ def plot_average_wf_timecourse(data, trial_types, saving_path, formats=['png']):
     for key, data in mice_avg_data_dict.items():
         plot_wf_avg(avg_data=data, output_path=saving_path, n_frames_post_stim=12, n_frames_averaged=2, key=key,
                     center_frame=10,
-                    c_scale=(-0.035, 0.035), figname=f'all_mice_{key}', save_formats=formats, subdir=key)
+                    c_scale=scale, figname=f'all_mice_{key}', save_formats=formats, subdir=key)
 
     # TIMECOURSES CONTEXT DIFFERENCE
     context_diff_dict = mice_avg_data_dict.copy()
@@ -52,7 +53,7 @@ def plot_average_wf_timecourse(data, trial_types, saving_path, formats=['png']):
         if key == 'R+ - R-':
             plot_wf_avg(avg_data=data, output_path=saving_path, n_frames_post_stim=12, n_frames_averaged=2,
                         key=key, center_frame=10,
-                        colormap='seismic', halfrange=0.015, figname=f'all_mice_{key}', save_formats=formats,
+                        colormap='seismic', halfrange=diff_range, figname=f'all_mice_{key}', save_formats=formats,
                         subdir=key)
 
     # TIMECOURSES D'

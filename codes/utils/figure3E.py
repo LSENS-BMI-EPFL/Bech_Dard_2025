@@ -32,7 +32,7 @@ def figure3e(table, saving_path, name, formats=['png']):
 
     # Do the stats W+ vs W-
     stat_results = psth_context_stats(df=data_to_plot, grid_spot=selected_spots)
-    save_table(df=stat_results, saving_path=saving_path, name='Figure3E_stats')
+    save_table(df=stat_results, saving_path=saving_path, name=f'{name}_stats')
 
     # Plot
     fig, axes = plt.subplots(2, 3, sharex=True, sharey=True, figsize=(4, 6))
