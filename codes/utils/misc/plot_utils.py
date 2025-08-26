@@ -36,7 +36,7 @@ def plot_with_point_and_strip(data, x_name, y_name, hue, palette, ax, palette_ke
     """
 
     sns.pointplot(data=data, x=x_name, y=y_name, hue=x_name if hue is None else hue, palette=palette[palette_key],
-                  dodge=True, estimator=np.nanmean, errorbar=('ci', 95), n_boot=1000, ax=ax, linewidth=3)
+                  dodge=True, estimator=np.nanmean, errorbar=('ci', 95), n_boot=1000, ax=ax, linewidth=2)
     # Link mice across days.
     if link_mice:
         mice = data.mouse_id.unique()

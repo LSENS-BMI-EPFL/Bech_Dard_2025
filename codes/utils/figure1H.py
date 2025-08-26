@@ -1,8 +1,10 @@
+import os
 import numpy as np
 import seaborn as sns
 import matplotlib.pyplot as plt
 from matplotlib.ticker import FixedLocator
 from codes.utils.misc.fig_saving import save_fig
+from codes.utils.misc.table_saving import df_to_latex
 
 
 def plot_figure1h(data_table, saving_path, name, saving_formats):
@@ -76,3 +78,10 @@ def plot_figure1h(data_table, saving_path, name, saving_formats):
     fig.tight_layout()
 
     save_fig(fig, saving_path, figure_name=name, formats=saving_formats)
+
+    # Convert to LaTeX with booktabs and improved names
+    stats_df = data_to_plot.drop(['whisker_trial', 'context'], axis=1)
+    stats_df.rename(columns={'lick_flag': 'P (lick)',
+                             'transition': 'Transition',
+                             'time_bin': 'Time bin'}, inplace=True)
+    df_to_latex(df=stats_df, filename=os.path.join(saving_path, 'Figure1H_table.tex'), caption='Figure1H', label='')

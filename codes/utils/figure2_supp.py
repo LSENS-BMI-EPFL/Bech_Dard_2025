@@ -32,8 +32,8 @@ def plot_figure2_supp1ab(data_table, saving_path, saving_formats):
     avg_df['d_sub'] = avg_df.apply(lambda x: abs(cohen_d(x.shuffle_dist_sub, x.data_sub)), axis=1)
     avg_df = avg_df.reset_index()
 
-    dprime_palette = 'inferno'
-    seismic_palette = sns.diverging_palette(265, 10, s=100, l=40, sep=30, n=200, center="light", as_cmap=True)
+    dprime_palette = 'binary'
+    seismic_palette = sns.diverging_palette(265, 10, s=100, l=40, sep=60, n=200, center="light", as_cmap=True)
 
     fig, axes = plt.subplots(2, 3, figsize=(8, 6))
     fig.suptitle(f'Opto grid control subtracted')
@@ -56,13 +56,13 @@ def plot_figure2_supp1ab(data_table, saving_path, saving_formats):
         group.rename(columns={'opto_grid_ml': 'x', 'opto_grid_ap': 'y'}, inplace=True)
         fig, axes[row, col] = plot_grid_on_allen(group, outcome=f"data_mean_sub", palette=seismic_palette,
                                                  facecolor=None,
-                                                 edgecolor=None, vmin=-0.4,
-                                                 vmax=0.4, dotsize=250, fig=fig, ax=axes[row, col], result_path=None)
+                                                 edgecolor='black', vmin=-0.3,
+                                                 vmax=0.3, dotsize=200, fig=fig, ax=axes[row, col], result_path=None)
         fig.tight_layout()
 
         fig1, axes1[row, col] = plot_grid_on_allen(group, outcome="d_sub", palette=dprime_palette,
-                                                   vmin=0.5, facecolor=None, edgecolor=None,
-                                                   vmax=2.2, dotsize=250, fig=fig1,
+                                                   vmin=0.5, facecolor=None, edgecolor='black',
+                                                   vmax=2.2, dotsize=200, fig=fig1,
                                                    ax=axes1[row, col], result_path=None)
         fig1.tight_layout()
 
@@ -103,7 +103,7 @@ def plot_figure2_supp1cde(muscimol, ringer, saving_path, sites, names, saving_fo
             'aud_palette': {hue_name[0]: 'mediumblue', hue_name[1]: 'cornflowerblue'}
         }
 
-        figure, (ax0, ax1) = plt.subplots(1, 2, figsize=(4, 4), sharey=True)
+        figure, (ax0, ax1) = plt.subplots(1, 2, figsize=(2, 3), sharey=True)
         for outcome, palette_key in zip(['outcome_n', 'outcome_a', 'outcome_w'],
                                         ['catch_palette', 'aud_palette', 'wh_palette']):
             plot_with_point_and_strip(data=df.loc[df.drug == 'Muscimol'], x_name='artificial_day', y_name=outcome,
@@ -113,8 +113,8 @@ def plot_figure2_supp1cde(muscimol, ringer, saving_path, sites, names, saving_fo
             plot_with_point_and_strip(data=df.loc[df.drug == 'Ringer'], x_name='artificial_day', y_name=outcome,
                                       hue='context_rwd_str', palette=context_palette, ax=ax0, palette_key=palette_key,
                                       link_mice=False)
-        ax0.set_title('Ringer injection')
-        ax1.set_title('Muscimol injection')
+        ax0.set_title('Ringer')
+        ax1.set_title('Muscimol')
         for ax in [ax0, ax1]:
             ax.get_legend().set_visible(False)
             ax_set(ax, ylim=[-0.1, 1.05], xlabel='Day', ylabel='Lick probability')
@@ -142,7 +142,7 @@ def plot_figure2_supp1cde(muscimol, ringer, saving_path, sites, names, saving_fo
                                         ['wh_palette', 'wh_palette', 'wh_palette']):
             sns.stripplot(data=difference, x='drug', order=['Ringer', 'Muscimol'], y=outcome, hue='context_rwd_str',
                           palette=context_palette[palette_key], legend=False, dodge=True, ax=axes.flatten()[ax],
-                          size=10)
+                          size=8)
             sns.pointplot(data=difference, x='drug', order=['Ringer', 'Muscimol'], y=outcome, hue='context_rwd_str',
                           palette=context_palette[palette_key],
                           legend=False, ax=axes.flatten()[ax], linestyle='none', estimator=np.nanmean, alpha=0.5,
@@ -163,10 +163,12 @@ def plot_figure2_supp2a(data_table, saving_path, name, saving_formats):
 
     selected_spots = ['(-1.5, 3.5)', '(-1.5, 4.5)', '(1.5, 1.5)', '(-1.5, 0.5)', '(2.5, 2.5)', '(0.5, 4.5)']
     contexts = [1, 0]
-    bodyparts = ['whisker_velocity', 'jaw_y', 'tongue_distance']
+    # bodyparts = ['whisker_velocity', 'jaw_y', 'tongue_distance']
+    bodyparts = ['jaw_y']
     combinations = list(itertools.product(contexts, bodyparts, selected_spots))
 
-    fig, axes = plt.subplots(6, 6, figsize=(15, 9), sharex=True)
+    # fig, axes = plt.subplots(6, 6, figsize=(6, 3), sharex=True)
+    fig, axes = plt.subplots(2, 6, figsize=(6, 3), sharex=True, sharey=True)
     for ax_idx, ax in enumerate(axes.flatten()):
         df_subplot = data_table.loc[(data_table.opto_stim_coord == combinations[ax_idx][2]) &
                                     (data_table.context == combinations[ax_idx][0])].copy()
@@ -194,19 +196,22 @@ def plot_figure2_supp2a(data_table, saving_path, name, saving_formats):
         ax.set_title(f'{"W+" if combinations[ax_idx][0] == 1 else "W-"}\n'
                      f'{combinations[ax_idx][2]}')
 
-    for ax in axes[0, :].flatten():
-        ax.set_ylim(-0.2, 1.4)
-    for ax in axes[1, :].flatten():
-        ax.set_ylim(-0.16, 2.8)
-    for ax in axes[2, :].flatten():
-        ax.set_ylim(-0.8, 15)
+    # for ax in axes[0, :].flatten():
+    #     ax.set_ylim(-0.2, 1.4)
+    # for ax in axes[1, :].flatten():
+    #     ax.set_ylim(-0.16, 2.8)
+    # for ax in axes[2, :].flatten():
+    #     ax.set_ylim(-0.8, 15)
+    #
+    # for ax in axes[3, :].flatten():
+    #     ax.set_ylim(-0.2, 1.4)
+    # for ax in axes[4, :].flatten():
+    #     ax.set_ylim(-0.2, 2.8)
+    # for ax in axes[5, :].flatten():
+    #     ax.set_ylim(-0.8, 15)
 
-    for ax in axes[3, :].flatten():
-        ax.set_ylim(-0.2, 1.4)
-    for ax in axes[4, :].flatten():
-        ax.set_ylim(-0.2, 2.8)
-    for ax in axes[5, :].flatten():
-        ax.set_ylim(-0.8, 15)
+    for ax in axes.flatten():
+        ax.set_ylim(-0.16, 2.8)
 
     fig.suptitle(f'Whisker trials')
     fig.tight_layout()
@@ -221,7 +226,8 @@ def plot_figure2_supp2b(data_table, saving_path, name, saving_formats):
                       '(0.5, 4.5)']
     sub_df = data_table.loc[data_table.opto_stim_coord.isin(selected_spots)].copy()
 
-    bodyparts_to_plot = ['whisker_velocity', 'jaw_y', 'tongue_distance']
+    # bodyparts_to_plot = ['whisker_velocity', 'jaw_y', 'tongue_distance']
+    bodyparts_to_plot = ['jaw_y']
     for context in sub_df.context.unique():
         sub_df_ctx = sub_df.loc[sub_df.context == context].copy()
         for bpart in bodyparts_to_plot:
@@ -235,7 +241,7 @@ def plot_figure2_supp2b(data_table, saving_path, name, saving_formats):
                 auc.append(scipy.integrate.simpson(df_plot.iloc[i][bpart][101: 116], np.arange(0, 15)))
             df_plot[f'auc'] = auc
 
-            fig, ax = plt.subplots(1, 1, figsize=(6, 3))
+            fig, ax = plt.subplots(1, 1, figsize=(4, 2))
             sns.barplot(data=df_plot, x='opto_stim_coord', y='auc', fill=False, color='black', order=selected_spots,
                         ax=ax)
             sns.scatterplot(data=df_plot, x='opto_stim_coord', y='auc', color='grey', alpha=0.5, ax=ax)
@@ -288,7 +294,8 @@ def plot_figure2_supp2b(data_table, saving_path, name, saving_formats):
 def plot_figure2_supp2c(data_table, saving_path, name, saving_formats):
     data_table = data_table.loc[data_table.trial_type == 'whisker_trial']
 
-    bodyparts_to_plot = ['whisker_velocity', 'jaw_y', 'tongue_distance']
+    # bodyparts_to_plot = ['whisker_velocity', 'jaw_y', 'tongue_distance']
+    bodyparts_to_plot = ['jaw_y']
 
     seismic_palette = sns.diverging_palette(265, 10, s=100, l=40, sep=30, n=200, center="light", as_cmap=True)
 

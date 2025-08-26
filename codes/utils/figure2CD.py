@@ -28,8 +28,8 @@ def figure2cd(data_table, saving_path, saving_formats):
     avg_df['d_sub'] = avg_df.apply(lambda x: abs(cohen_d(x.shuffle_dist_sub, x.data_sub)), axis=1)
     avg_df = avg_df.reset_index()
 
-    dprime_palette = 'inferno'
-    seismic_palette = sns.diverging_palette(265, 10, s=100, l=40, sep=30, n=200, center="light", as_cmap=True)
+    dprime_palette = 'binary'
+    seismic_palette = sns.diverging_palette(265, 10, s=100, l=40, sep=60, n=200, center="light", as_cmap=True)
 
     fig, axes = plt.subplots(2, 3, figsize=(8, 6))
     fig.suptitle(f'Opto grid control subtracted')
@@ -51,12 +51,12 @@ def figure2cd(data_table, saving_path, saving_formats):
 
         group.rename(columns={'opto_grid_ml': 'x', 'opto_grid_ap': 'y'}, inplace=True)
         fig, axes[row, col] = plot_grid_on_allen(group, outcome=f"data_mean_sub", palette=seismic_palette, facecolor=None,
-                                                 edgecolor=None, vmin=-0.4,
-                                                 vmax=0.4, dotsize=250, fig=fig, ax=axes[row, col], result_path=None)
+                                                 edgecolor='black', vmin=-0.3,
+                                                 vmax=0.3, dotsize=250, fig=fig, ax=axes[row, col], result_path=None)
         fig.tight_layout()
 
         fig1, axes1[row, col] = plot_grid_on_allen(group, outcome="d_sub", palette=dprime_palette,
-                                                   vmin=0.5, facecolor=None, edgecolor=None,
+                                                   vmin=0.5, facecolor=None, edgecolor='black',
                                                    vmax=2.2, dotsize=250, fig=fig1,
                                                    ax=axes1[row, col], result_path=None)
         fig1.tight_layout()

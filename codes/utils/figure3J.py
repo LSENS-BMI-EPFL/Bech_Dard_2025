@@ -8,7 +8,7 @@ from codes.utils.misc.fig_saving import save_fig
 
 def figure3j(auditory_df, whisker_df, saving_path, name, formats=['png', 'svg']):
     t_start = 0.05
-    t_stop = 0.18
+    t_stop = 0.12
 
     # DROP
     auditory_df = auditory_df.drop(['event', 'roi', 'behavior_type', 'behavior_day'], axis=1)

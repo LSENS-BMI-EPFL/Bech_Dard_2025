@@ -41,5 +41,5 @@ figure1FG.plot_figure1fg(data_table=df, saving_path=fig_folder, name='Figure1FG'
 # 1H
 # LOAD DATA :
 table_path = os.path.join(main_dir, 'data', 'figure1', '1H')
-df = pd.read_csv(os.path.join(table_path, 'context_days_full_table.csv'), index_col=0)
+df = pd.read_csv(os.path.join(table_path, 'whisker_transitions_table.csv'), index_col=0)
 figure1H.plot_figure1h(data_table=df, saving_path=fig_folder, name='Figure1H', saving_formats=['png', 'svg'])

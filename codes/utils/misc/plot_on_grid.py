@@ -40,7 +40,7 @@ def plot_grid_on_allen(grid, outcome, palette, facecolor, edgecolor, result_path
                           mode='constant', constant_values=np.nan)
     im = ax.imshow(single_frame, cmap=cmap, vmin=0, vmax=1)
     if palette is not None:
-        g = sns.scatterplot(data=grid, x='ml_wf', y='ap_wf', hue=f'{outcome}',
+        g = sns.scatterplot(data=grid, x='ml_wf', y='ap_wf', hue=f'{outcome}', edgecolor=edgecolor,
                             hue_norm=norm, s=dotsize, marker=dotmarker, palette=palette, ax=ax, zorder=dotzorder)
     else:
         g = sns.scatterplot(data=grid, x='ml_wf', y='ap_wf', s=dotsize, marker=dotmarker, facecolor=facecolor,
@@ -50,8 +50,8 @@ def plot_grid_on_allen(grid, outcome, palette, facecolor, edgecolor, result_path
                linewidths=1)
     ax.contour(iso_mask, levels=np.unique(np.round(iso_mask)), colors='black',
                linewidths=2, zorder=2)
-    ax.scatter(bregma[0], bregma[1], marker='+', c='r', s=300, linewidths=4,
-               zorder=3)
+    # ax.scatter(bregma[0], bregma[1], marker='+', c='r', s=300, linewidths=4,
+    #            zorder=3)
 
     ax.set_xticks(grid.ml_wf.unique(), grid.x.unique())
     ax.set_yticks(grid.ap_wf.unique(), grid.y.unique())

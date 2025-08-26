@@ -2,6 +2,7 @@ import os
 import warnings
 import numpy as np
 import matplotlib.pyplot as plt
+from scipy.ndimage import gaussian_filter
 from codes.utils.misc.plot_on_allen import plot_wf_avg, plot_wf_single_frame
 from codes.utils.misc.stats import compute_dprime, first_above_threshold_frame
 
@@ -67,16 +68,17 @@ def plot_average_wf_timecourse(data, trial_types, saving_path, formats=['png'],
     # FIRST TIME D' ABOVE 2
     first_frame = first_above_threshold_frame(d=d_prime, threshold=2, start_frame=12)
     first_frame = first_frame / 100 + 2 / 100
+    filtered_first_frame = gaussian_filter(first_frame, sigma=1)
     t_sig_save_path = os.path.join(saving_path, 'dprime')
     if not os.path.exists(t_sig_save_path):
         os.makedirs(t_sig_save_path)
     fig, ax = plt.subplots(1, 1, figsize=(5, 5))
-    plot_wf_single_frame(frame=first_frame, title='Sig', figure=fig, ax_to_plot=ax, suptitle='time',
-                         saving_path=t_sig_save_path, save_formats=['png'], colormap='magma_r',
-                         vmin=0.00, vmax=0.12, cbar_shrink=0.7, separated_plots=True, nan_c='black')
+    plot_wf_single_frame(frame=filtered_first_frame, title='Sig', figure=fig, ax_to_plot=ax, suptitle='time',
+                         saving_path=t_sig_save_path, save_formats=['png'], colormap='Reds_r',
+                         vmin=0.03, vmax=0.08, cbar_shrink=0.7, separated_plots=True, nan_c='white')
 
     if os.path.basename(saving_path) == '3F':
         fig, ax = plt.subplots(1, 1, figsize=(5, 5))
-        plot_wf_single_frame(frame=first_frame, title='Figure3H', figure=fig, ax_to_plot=ax, suptitle=' ',
-                             saving_path=os.path.dirname(saving_path), save_formats=['png'], colormap='magma_r',
-                             vmin=0.00, vmax=0.12, cbar_shrink=0.7, separated_plots=True, nan_c='black')
+        plot_wf_single_frame(frame=filtered_first_frame, title='Figure3H', figure=fig, ax_to_plot=ax, suptitle=' ',
+                             saving_path=os.path.dirname(saving_path), save_formats=['png'], colormap='binary_r',
+                             vmin=0.03, vmax=0.08, cbar_shrink=0.7, separated_plots=True, nan_c='white')

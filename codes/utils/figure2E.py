@@ -55,43 +55,43 @@ def figure2e(data_table, saving_path):
     seismic_palette = sns.diverging_palette(265, 10, s=100, l=40, sep=30, n=200, center="light", as_cmap=True)
 
     # Whisker
-    fig, ax = plt.subplots(1, 1, figsize=(4, 4))
+    fig, ax = plt.subplots(1, 1, figsize=(3, 3))
     wh_piezo_rt_df['y'] = wh_piezo_rt_df['opto_stim_coord'].apply(lambda x: ast.literal_eval(x)[0])
     wh_piezo_rt_df['x'] = wh_piezo_rt_df['opto_stim_coord'].apply(lambda x: ast.literal_eval(x)[1])
     plot_grid_on_allen(wh_piezo_rt_df.loc[wh_piezo_rt_df.opto_stim_coord != '(-5.0, 5.0)'].copy(), outcome='rt_diff',
-                       palette=seismic_palette, facecolor=None, edgecolor=None, result_path=None, dotsize=450,
+                       palette=seismic_palette, facecolor=None, edgecolor='black', result_path=None, dotsize=175,
                        vmin=-0.25, vmax=0.25, fig=fig, ax=ax)
     fig.suptitle('Whisker trials')
     fig.tight_layout()
     fig.savefig(os.path.join(saving_path, 'Figure2E_whisker_effect.png'), dpi=400)
 
-    fig, ax = plt.subplots(1, 1, figsize=(4, 4))
+    fig, ax = plt.subplots(1, 1, figsize=(3, 3))
     whdprime_df['y'] = whdprime_df['opto_stim_coord'].apply(lambda x: ast.literal_eval(x)[0])
     whdprime_df['x'] = whdprime_df['opto_stim_coord'].apply(lambda x: ast.literal_eval(x)[1])
     plot_grid_on_allen(whdprime_df.loc[whdprime_df.opto_stim_coord != '(-5.0, 5.0)'].copy(), outcome='dprime',
-                       palette='inferno', facecolor=None, edgecolor=None, result_path=None, dotsize=450,
-                       vmin=0.8, vmax=2.0, fig=fig, ax=ax)
+                       palette='binary', facecolor=None, edgecolor='black', result_path=None, dotsize=175,
+                       vmin=0.5, vmax=2.2, fig=fig, ax=ax)
     fig.suptitle('Whisker trials')
     fig.tight_layout()
     fig.savefig(os.path.join(saving_path, 'Figure2E_whisker_dprime.png'), dpi=400)
 
     # Auditory
-    fig, ax = plt.subplots(1, 1, figsize=(4, 4))
+    fig, ax = plt.subplots(1, 1, figsize=(3, 3))
     aud_piezo_rt_df['y'] = aud_piezo_rt_df['opto_stim_coord'].apply(lambda x: ast.literal_eval(x)[0])
     aud_piezo_rt_df['x'] = aud_piezo_rt_df['opto_stim_coord'].apply(lambda x: ast.literal_eval(x)[1])
     plot_grid_on_allen(aud_piezo_rt_df.loc[aud_piezo_rt_df.opto_stim_coord != '(-5.0, 5.0)'].copy(), outcome='rt_diff',
-                       palette=seismic_palette, facecolor=None, edgecolor=None, result_path=None, dotsize=450,
+                       palette=seismic_palette, facecolor=None, edgecolor='black', result_path=None, dotsize=175,
                        vmin=-0.25, vmax=0.25, fig=fig, ax=ax)
     fig.suptitle('Auditory trials')
     fig.tight_layout()
     fig.savefig(os.path.join(saving_path, 'Figure2E_auditory_effect.png'), dpi=400)
 
-    fig, ax = plt.subplots(1, 1, figsize=(4, 4))
+    fig, ax = plt.subplots(1, 1, figsize=(3, 3))
     audprime_df['y'] = audprime_df['opto_stim_coord'].apply(lambda x: ast.literal_eval(x)[0])
     audprime_df['x'] = audprime_df['opto_stim_coord'].apply(lambda x: ast.literal_eval(x)[1])
     plot_grid_on_allen(audprime_df.loc[audprime_df.opto_stim_coord != '(-5.0, 5.0)'].copy(), outcome='dprime',
-                       palette='inferno', facecolor=None, edgecolor=None, result_path=None, dotsize=450,
-                       vmin=0.8, vmax=2.0, fig=fig, ax=ax)
+                       palette='binary', facecolor=None, edgecolor='black', result_path=None, dotsize=175,
+                       vmin=0.5, vmax=2.2, fig=fig, ax=ax)
     fig.suptitle('Auditory trials')
     fig.tight_layout()
     fig.savefig(os.path.join(saving_path, 'Figure2E_auditory_dprime.png'), dpi=400)

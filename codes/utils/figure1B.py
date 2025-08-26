@@ -26,8 +26,7 @@ def plot_figure1b(data_table, saving_path, name, saving_formats):
     # Compute performance average per block
     for outcome, new_col in zip(['outcome_w', 'outcome_a', 'outcome_n', 'correct_choice'],
                                 ['hr_w', 'hr_a', 'hr_n', 'correct']):
-        session_table[new_col] = session_table.groupby(['block', 'opto_stim'], as_index=False)[outcome].transform(
-            np.nanmean)
+        session_table[new_col] = session_table.groupby(['block', 'opto_stim'], as_index=False)[outcome].transform('mean')
 
     # Subsample at one value per block for performance plot
     d = session_table.loc[session_table.early_lick == 0][int(block_length / 2)::block_length]
