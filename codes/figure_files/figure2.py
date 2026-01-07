@@ -12,7 +12,8 @@ if not os.path.exists(fig_folder):
 # LOAD DATA :
 table_path = os.path.join(main_dir, 'data', 'figure2', '2CD')
 df = pd.read_csv(os.path.join(table_path, 'optogrid_data_table_VGAT.csv'), index_col=0)
-figure2CD.figure2cd(data_table=df, saving_path=fig_folder, saving_formats=['png'])
+trial_df = pd.read_csv(os.path.join(table_path, 'trial_data_table_VGAT.csv'), index_col=0)
+figure2CD.figure2cd(data_table=df, trial_table=trial_df, saving_path=fig_folder, saving_formats=['png'])
 
 # 2E
 # LOAD DATA :

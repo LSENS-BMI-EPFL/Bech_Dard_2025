@@ -4,6 +4,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from codes.utils.misc.fig_saving import save_fig
+from codes.utils.misc.table_saving import save_table
 
 
 def figure3j(auditory_df, whisker_df, saving_path, name, formats=['png', 'svg']):
@@ -17,11 +18,11 @@ def figure3j(auditory_df, whisker_df, saving_path, name, formats=['png', 'svg'])
     # DATA:
     # Whisker
     wh_session_df = whisker_df.groupby(['time', 'mouse_id', 'session_id', 'cell_type', 'trial_type', 'epoch'],
-                                       as_index=False).agg(np.nanmean)
+                                       as_index=False).agg('mean')
     wh_mouse_df = wh_session_df.copy()
     wh_mouse_df = wh_mouse_df.drop(['session_id'], axis=1)
     wh_mouse_df = wh_mouse_df.groupby(['time', 'mouse_id', 'cell_type', 'trial_type', 'epoch'],
-                                      as_index=False).agg(np.nanmean)
+                                      as_index=False).agg('mean')
     wh_coord_mouse_df = wh_mouse_df.copy(deep=True)
     wh_coord_mouse_df['AP'] = wh_mouse_df['cell_type'].apply(lambda x: ast.literal_eval(x)[0])
     wh_coord_mouse_df['ML'] = wh_mouse_df['cell_type'].apply(lambda x: ast.literal_eval(x)[1])
@@ -37,11 +38,11 @@ def figure3j(auditory_df, whisker_df, saving_path, name, formats=['png', 'svg'])
 
     # Auditory
     aud_session_df = auditory_df.groupby(['time', 'mouse_id', 'session_id', 'cell_type', 'trial_type', 'epoch'],
-                                         as_index=False).agg(np.nanmean)
+                                         as_index=False).agg('mean')
     aud_mouse_df = aud_session_df.copy()
     aud_mouse_df = aud_mouse_df.drop(['session_id'], axis=1)
     aud_mouse_df = aud_mouse_df.groupby(['time', 'mouse_id', 'cell_type', 'trial_type', 'epoch'],
-                                        as_index=False).agg(np.nanmean)
+                                        as_index=False).agg('mean')
     aud_coord_mouse_df = aud_mouse_df.copy(deep=True)
     aud_coord_mouse_df['AP'] = aud_coord_mouse_df['cell_type'].apply(lambda x: ast.literal_eval(x)[0])
     aud_coord_mouse_df['ML'] = aud_coord_mouse_df['cell_type'].apply(lambda x: ast.literal_eval(x)[1])
@@ -55,6 +56,14 @@ def figure3j(auditory_df, whisker_df, saving_path, name, formats=['png', 'svg'])
     selected_spots = ['(-2.5, 5.5)', '(-1.5, 3.5)', '(-1.5, 4.5)', '(1.5, 1.5)', '(-1.5, 0.5)', '(2.5, 2.5)',
                       '(0.5, 4.5)']
     sel_full_peak_df = full_peak_df.loc[full_peak_df.cell_type.isin(selected_spots)]
+    saved_table = sel_full_peak_df.copy()
+    saved_table.rename(columns={'time': 'Peak time (s)',
+                                'mouse_id': 'Mouse',
+                                'cell_type': 'Area',
+                                'trial_type': 'Trial type',
+                                'epoch': 'Context',
+                                'activity': 'Dff'}, inplace=True)
+    save_table(df=saved_table, saving_path=saving_path, name=f'{name}_data')
 
     colors = {'(-1.5, 0.5)': 'pink',
               '(-1.5, 3.5)': 'darkorange',

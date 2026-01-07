@@ -178,9 +178,11 @@ def plot_figure2_supp2a(data_table, saving_path, name, saving_formats):
         df_subplot['time'] = [time_vector] * len(df_subplot)
         df_subplot = df_subplot[['time', 'mouse_id', combinations[ax_idx][1]]]
         df_long = df_subplot.explode([combinations[ax_idx][1], 'time'], ignore_index=True)
+        df_long = df_long.loc[(df_long.time > -0.07) & (df_long.time < 0.15)]
         if combinations[ax_idx][1] == 'whisker_velocity':
             df_long[combinations[ax_idx][1]] = np.abs(df_long[combinations[ax_idx][1]])
         sns.lineplot(df_long, x='time', y=combinations[ax_idx][1], color='royalblue', ax=ax)
+
         df_subplot_ctrl = data_table.loc[(data_table.opto_stim_coord == '(-5.0, 5.0)') &
                                          (data_table.context == combinations[ax_idx][0])].copy()
         df_subplot_ctrl[combinations[ax_idx][1]] = df_subplot_ctrl[combinations[ax_idx][1]].apply(
@@ -188,9 +190,12 @@ def plot_figure2_supp2a(data_table, saving_path, name, saving_formats):
         df_subplot_ctrl['time'] = [time_vector] * len(df_subplot_ctrl)
         df_subplot_ctrl = df_subplot_ctrl[['time', 'mouse_id', combinations[ax_idx][1]]]
         df_subplot_ctrl_long = df_subplot_ctrl.explode([combinations[ax_idx][1], 'time'], ignore_index=True)
+        df_subplot_ctrl_long = df_subplot_ctrl_long.loc[(df_subplot_ctrl_long.time > -0.07)
+                                                        & (df_subplot_ctrl_long.time < 0.15)]
         if combinations[ax_idx][1] == 'whisker_velocity':
             df_subplot_ctrl_long[combinations[ax_idx][1]] = np.abs(df_subplot_ctrl_long[combinations[ax_idx][1]])
         sns.lineplot(df_subplot_ctrl_long, x='time', y=combinations[ax_idx][1], color='grey', ax=ax)
+
         sns.despine()
         ax.axvline(x=0, ymin=0, ymax=1, linestyle='--', c='k')
         ax.set_title(f'{"W+" if combinations[ax_idx][0] == 1 else "W-"}\n'
@@ -211,7 +216,7 @@ def plot_figure2_supp2a(data_table, saving_path, name, saving_formats):
     #     ax.set_ylim(-0.8, 15)
 
     for ax in axes.flatten():
-        ax.set_ylim(-0.16, 2.8)
+        ax.set_ylim(-0.16, 2)
 
     fig.suptitle(f'Whisker trials')
     fig.tight_layout()
@@ -317,14 +322,15 @@ def plot_figure2_supp2c(data_table, saving_path, name, saving_formats):
             df_plot[f'delta_auc'] = df_plot[f'auc'] - df_plot[f'ctrl_auc']
 
             full_avg_df = df_plot.copy().drop(['mouse_id', bpart, 'context', 'trial_type', 'time'], axis=1).groupby(
-                ['opto_stim_coord'], as_index=False).agg(np.nanmean).reset_index()
+                ['opto_stim_coord'], as_index=False).agg('mean').reset_index()
             full_avg_df['y'] = full_avg_df['opto_stim_coord'].apply(lambda x: ast.literal_eval(x)[0])
             full_avg_df['x'] = full_avg_df['opto_stim_coord'].apply(lambda x: ast.literal_eval(x)[1])
+
             fig, ax = plt.subplots(1, 1, figsize=(4, 4))
             plot_grid_on_allen(full_avg_df, outcome='delta_auc', palette=seismic_palette, facecolor=None,
-                               edgecolor=None,
+                               edgecolor='black',
                                vmin=-(np.max(np.abs(full_avg_df.delta_auc))),
-                               vmax=np.max(np.abs(full_avg_df.delta_auc)), result_path=None, dotsize=420, fig=fig,
+                               vmax=np.max(np.abs(full_avg_df.delta_auc)), result_path=None, dotsize=350, fig=fig,
                                ax=ax)
             ax.set_title(f'{bpart} -  "all_trials"\n'
                          f'{"W+" if context == 1 else "W-"}')

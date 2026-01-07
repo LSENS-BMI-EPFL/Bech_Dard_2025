@@ -35,6 +35,8 @@ def plot_grid_on_allen(grid, outcome, palette, facecolor, edgecolor, result_path
     grid['ml_wf'] = bregma[0] - grid['x'] * scalebar
     grid['ap_wf'] = bregma[1] - grid['y'] * scalebar
 
+    grid = grid.loc[~(((grid.x == 5.5) & (grid.y == 1.5)) | ((grid.x == 4.5) & (grid.y == 2.5)))]
+
     single_frame = np.rot90(rescale(np.ones([125, 160]), scale, anti_aliasing=False))
     single_frame = np.pad(single_frame, [(0, 650 - single_frame.shape[0]), (0, 510 - single_frame.shape[1])],
                           mode='constant', constant_values=np.nan)

@@ -1,7 +1,7 @@
 import os
 import numpy as np
 import pandas as pd
-from codes.utils import figure3D, figure3E, figure3F, figure3G, figure3I, figure3J
+from codes.utils import figure3D, figure3E, figure3F, figure3G, figure3I, figure3J, figure3_supp
 
 
 # Get main data and saving dir
@@ -54,3 +54,18 @@ whisker_path = os.path.join(main_dir, 'data', 'figure3_supp', '1D')
 whisker_df = pd.read_csv(os.path.join(whisker_path, 'PSTHs_dataset.csv'), index_col=0)
 figure3J.figure3j(auditory_df, whisker_df, saving_path=fig_folder, name='Figure3_supp1G', formats=['png', 'svg'])
 
+# Context transitions
+# LOAD DATA :
+data_path = os.path.join(main_dir, 'data', 'figure3', '3F')
+data_dict = np.load(os.path.join(data_path, 'general_data_dict.npy'), allow_pickle=True).item()
+result_folder = os.path.join(fig_folder, 'transition')
+if not os.path.exists(result_folder):
+    os.makedirs(result_folder)
+figure3_supp.wf_timecourse_context_switch(data=data_dict, saving_path=result_folder, formats=['png'])
+
+
+# 3I supp: d' above 2 for each mouse based on PSTHs
+# LOAD DATA :
+table_path = os.path.join(main_dir, 'data', 'figure3', '3G')
+df = pd.read_csv(os.path.join(table_path, 'PSTHs_dataset.csv'), index_col=0)
+figure3_supp.dprime_by_mouse(df, saving_path=fig_folder, name='Figure3I_supp', formats=['png', 'svg'])

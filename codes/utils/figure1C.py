@@ -1,6 +1,8 @@
 import os
+import numpy as np
 import pandas as pd
 import seaborn as sns
+import scipy.stats as st
 import matplotlib.pyplot as plt
 from codes.utils.misc.fig_saving import save_fig
 from codes.utils.misc.table_saving import save_table, df_to_latex
@@ -62,8 +64,6 @@ def plot_figure1c(data_table, saving_path, name, saving_formats):
                         right_on=['context_rwd_str', 'context'], how='right')
     stats_df['N'] = len(avg_data_table.mouse_id.unique())
 
-    save_table(df=stats_df, saving_path=saving_path, name='Figure1C_table', format=['csv'])
-
     # Convert to LaTeX with booktabs and improved names
     stats_df = stats_df.drop('context', axis=1)
     stats_df.rename(columns={'context_rwd_str': 'Context',
@@ -74,3 +74,37 @@ def plot_figure1c(data_table, saving_path, name, saving_formats):
                              'whisker_std': 'Whisker std',
                              'catch_std': 'Catch std'}, inplace=True)
     df_to_latex(df=stats_df, filename=os.path.join(saving_path, 'Figure1C_table.tex'), caption='Figure1C', label='')
+    save_table(df=stats_df, saving_path=saving_path, name='Figure1C_table', format=['csv'])
+
+    # Test for difference in catch trials
+    non_rwd_fa = avg_data_table.loc[avg_data_table.context == 0, 'outcome_n'].values
+    rwd_fa = avg_data_table.loc[avg_data_table.context == 1, 'outcome_n'].values
+    (t, p) = st.ttest_rel(non_rwd_fa, rwd_fa)
+    dof = st.ttest_rel(non_rwd_fa, rwd_fa).df
+    cath_stat_df = pd.DataFrame({'W+ mean': [np.nanmean(rwd_fa)],
+                                'W- mean': [np.nanmean(non_rwd_fa)],
+                                 'W+ std': [np.nanstd(rwd_fa)],
+                                 'W- std': [np.nanstd(non_rwd_fa)],
+                                 'N': [len(rwd_fa)],
+                                 'dof': [dof],
+                                 "d'": [(np.nanmean(rwd_fa) - np.nanmean(non_rwd_fa)) /
+                                        np.sqrt(0.5 * (np.nanstd(rwd_fa) ** 2 + np.nanstd(non_rwd_fa) ** 2))],
+                                 'T': [t],
+                                 'p': [p]})
+    pd.set_option("display.float_format", "{:.2e}".format)
+    save_table(df=cath_stat_df, saving_path=saving_path, name='Figure1C_catch_stats_table', format=['csv'])
+    df_to_latex(df=cath_stat_df, filename=os.path.join(saving_path, 'Figure1C_catch_table.tex'),
+                form={col: lambda x: f"${x:.2e}$" for col in ['p']},
+                caption='Figure1C', label='')
+
+    # Average auditory hit rate independently of W+ / W-
+    aud_hr_table = data_table.drop(['session_id', 'context', 'context_rwd_str'], axis=1)
+    aud_hr_table = aud_hr_table.groupby(['mouse_id'], as_index=False).agg('mean')
+    aud_hr_avg = aud_hr_table['outcome_a'].mean()
+    aud_hr_std = aud_hr_table['outcome_a'].std()
+    auditory_df = pd.DataFrame({'Auditory mean': [aud_hr_avg],
+                                'Auditory std': [aud_hr_std],
+                                'N': [len(aud_hr_table['outcome_a'])]})
+    save_table(df=auditory_df, saving_path=saving_path, name='Figure1C_auditory_gran_average_table', format=['csv'])
+    df_to_latex(df=auditory_df, filename=os.path.join(saving_path, 'Figure1C_auditory_gran_average_table.tex'),
+                caption='Figure1C', label='')

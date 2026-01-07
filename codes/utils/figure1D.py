@@ -4,6 +4,7 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 from codes.utils.misc.fig_saving import save_fig
 from codes.utils.misc.table_saving import save_table, df_to_latex
+pd.set_option("display.float_format", "{:.2e}".format)
 
 
 def plot_figure1d(data_table, saving_path, name, saving_formats):
@@ -63,8 +64,6 @@ def plot_figure1d(data_table, saving_path, name, saving_formats):
                         right_on=['context_background'], how='right')
     stats_df['N'] = len(avg_data_table.mouse_id.unique())
 
-    save_table(df=stats_df, saving_path=saving_path, name='Figure1E_table', format=['csv'])
-
     # Convert to LaTeX with booktabs and improved names
     stats_df.rename(columns={'context_background': 'Context sound',
                              'auditory_mean': 'Auditory mean',
@@ -73,4 +72,5 @@ def plot_figure1d(data_table, saving_path, name, saving_formats):
                              'auditory_std': 'Auditory std',
                              'whisker_std': 'Whisker std',
                              'catch_std': 'Catch std'}, inplace=True)
-    df_to_latex(df=stats_df, filename=os.path.join(saving_path, 'Figure1E_table.tex'), caption='Figure1E', label='')
+    df_to_latex(df=stats_df, filename=os.path.join(saving_path, 'Figure1D_table.tex'), caption='Figure1D', label='')
+    save_table(df=stats_df, saving_path=saving_path, name='Figure1D_table', format=['csv'])

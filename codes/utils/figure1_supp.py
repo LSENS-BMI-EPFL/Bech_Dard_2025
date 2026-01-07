@@ -127,7 +127,7 @@ def plot_figure1_supp1d(data_table, saving_path, name, saving_formats):
 
 def plot_figure1_supp1e(data_table, saving_path, name, saving_formats):
     stim_data_table = data_table.loc[data_table.trial_type.isin(["auditory_trial", "whisker_trial"])]
-    avg_df = stim_data_table.groupby(['mouse_id', 'trial_type', 'context'], as_index=False).agg(np.nanmean)
+    avg_df = stim_data_table.groupby(['mouse_id', 'trial_type', 'context'], as_index=False).agg('mean')
 
     # Stats
     ttypes = []
@@ -169,6 +169,7 @@ def plot_figure1_supp1e(data_table, saving_path, name, saving_formats):
                       'd-prime': dprime
                       }
     reaction_stats = pd.DataFrame(reaction_stats)
+    pd.set_option("display.float_format", "{:.2e}".format)
     reaction_stats['Significant'] = [True if val < 0.05 else False for val in reaction_stats['pval'].values.tolist()]
     save_table(df=reaction_stats, saving_path=saving_path, name=f'{name}_stats', format=['csv'])
 
@@ -190,3 +191,68 @@ def plot_figure1_supp1e(data_table, saving_path, name, saving_formats):
 
     save_fig(fig, saving_path, figure_name=name, formats=saving_formats)
 
+
+def dprime_criterion(data_table, saving_path, name, saving_formats):
+    # Count
+    n_sess = len(data_table.session_id.unique())
+    n_mice = len(data_table.mouse_id.unique())
+
+    # Keep relevant column
+    cols = ['mouse_id', 'session_id', 'trial_id', 'trial_type',
+            'outcome_w', 'outcome_a', 'outcome_n', 'context', 'context_background']
+    data_table_sel = data_table[cols]
+
+    session_list = []
+    mouse_list = []
+    context_list = []
+    dprime_list = []
+    criterion_list = []
+    for session in data_table_sel.session_id.unique():
+        df = data_table_sel.loc[data_table_sel.session_id == session].copy()
+        df['block'] = df['trial_id'].transform(lambda x: x // 20)
+        df_block = df.groupby(['mouse_id', 'session_id', 'block', 'trial_type', 'context', 'context_background'],
+                              as_index=False).agg('mean')
+
+        for context in df_block.context.unique():
+            catch_data = df_block.loc[df_block.context == context].outcome_n.dropna().values[:]
+            wh_data = df_block.loc[df_block.context == context].outcome_w.dropna().values[:]
+
+            # dprime
+            dprime = (np.mean(wh_data) - np.mean(catch_data)) / np.sqrt(0.5 * (np.var(wh_data) + np.var(catch_data)))
+
+            # criterion
+            z_wh = st.norm.ppf(np.mean(wh_data))
+            z_catch = st.norm.ppf(np.mean(catch_data))
+            criterion = -0.5 * (z_wh + z_catch)
+
+            session_list.append(session)
+            mouse_list.append(df.mouse_id.unique()[0])
+            dprime_list.append(dprime)
+            criterion_list.append(criterion)
+            context_list.append(context)
+
+    results_df = pd.DataFrame({'mouse': mouse_list,
+                               'session': session_list,
+                               'dprime': dprime_list,
+                               'criterion': criterion_list,
+                               'context': context_list})
+
+    avg_results = results_df.drop('session', axis=1).groupby(['mouse', 'context'], as_index=False).agg('mean')
+
+    fig, (ax0, ax1) = plt.subplots(1, 2, figsize=(5, 2.5))
+    sns.pointplot(avg_results, y='dprime', hue='context', hue_order=[0, 1], palette=['darkmagenta', 'green'],
+                  legend=False, dodge=True, ax=ax0)
+    sns.stripplot(avg_results, y='dprime', hue='context', hue_order=[0, 1], palette=['darkmagenta', 'green'],
+                  legend=False, dodge=True, ax=ax0)
+    sns.pointplot(avg_results, y='criterion', hue='context', hue_order=[0, 1], palette=['darkmagenta', 'green'],
+                  legend=False, dodge=True, ax=ax1)
+    sns.stripplot(avg_results, y='criterion', hue='context', hue_order=[0, 1], palette=['darkmagenta', 'green'],
+                  legend=False, dodge=True, ax=ax1)
+    ax0.set_ylabel("Whisker D'")
+    ax0.set_xlabel('Context')
+    ax1.set_ylabel("Whisker Criterion")
+    ax1.set_xlabel('Context')
+    sns.despine()
+    fig.tight_layout()
+
+    save_fig(fig, saving_path, figure_name=name, formats=saving_formats)

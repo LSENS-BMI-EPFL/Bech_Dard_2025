@@ -1,10 +1,13 @@
 import os
-import numpy as np
 import seaborn as sns
+import pandas as pd
+import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.ticker import FixedLocator
 from codes.utils.misc.fig_saving import save_fig
-from codes.utils.misc.table_saving import df_to_latex
+from codes.utils.misc.stats import analyze_both_transitions
+from codes.utils.misc.table_saving import df_to_latex, save_table
+pd.set_option("display.float_format", "{:.2e}".format)
 
 
 def plot_figure1h(data_table, saving_path, name, saving_formats):
@@ -77,7 +80,14 @@ def plot_figure1h(data_table, saving_path, name, saving_formats):
     sns.despine()
     fig.tight_layout()
 
+    results, fit_fig = analyze_both_transitions(data_to_plot, plot=True)
+
+    # Access individual results
+    tau_w_plus = results['To W+']['tau_seconds']  # in seconds
+    tau_w_minus = results['To W-']['tau_seconds']  # in seconds
+
     save_fig(fig, saving_path, figure_name=name, formats=saving_formats)
+    save_fig(fit_fig, saving_path, figure_name=f'{name}_fit', formats=saving_formats)
 
     # Convert to LaTeX with booktabs and improved names
     stats_df = data_to_plot.drop(['whisker_trial', 'context'], axis=1)
@@ -85,3 +95,4 @@ def plot_figure1h(data_table, saving_path, name, saving_formats):
                              'transition': 'Transition',
                              'time_bin': 'Time bin'}, inplace=True)
     df_to_latex(df=stats_df, filename=os.path.join(saving_path, 'Figure1H_table.tex'), caption='Figure1H', label='')
+    save_table(stats_df, saving_path, f'{name}_stat_results', format=['csv'])

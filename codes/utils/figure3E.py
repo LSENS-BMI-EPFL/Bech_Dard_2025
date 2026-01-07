@@ -10,15 +10,18 @@ from codes.utils.misc.table_saving import save_table
 def figure3e(table, saving_path, name, formats=['png']):
     table = table.drop(['event', 'roi', 'behavior_type', 'behavior_day'], axis=1)
 
+    # Select time
+    table = table.loc[(table.time > -0.09) & (table.time < 0.160)]
+
     # Average within session
     session_df = table.groupby(['time', 'mouse_id', 'session_id', 'cell_type', 'trial_type', 'epoch'],
-                               as_index=False).agg(np.nanmean)
+                               as_index=False).agg('mean')
 
     # Average within mouse
     mouse_df = session_df.copy()
     mouse_df = mouse_df.drop(['session_id'], axis=1)
     mouse_df = mouse_df.groupby(['time', 'mouse_id', 'cell_type', 'trial_type', 'epoch'], as_index=False).agg(
-        np.nanmean)
+        'mean')
 
     # Add AP / ML coordinates
     coord_mouse_df = mouse_df.copy(deep=True)
@@ -43,7 +46,7 @@ def figure3e(table, saving_path, name, formats=['png']):
                      palette=color_palette, legend=False, ax=ax)
         sns.despine()
         ax.axvline(x=0, ymin=0, ymax=1, c='blue', linestyle='--')
-        ax.set_xticks([0.0, 0.1, 0.2])
+        ax.set_xlim(-0.1, 0.180)
         ax.set_ylim(-0.01, 0.052)
         ax.set_yticks([0.00, 0.01, 0.02, 0.03, 0.04, 0.05], labels=['0.0', '1.0', '2.0', '3.0', '4.0', '5.0'])
         ax.set_ylabel('DF/F0 (%)')
@@ -53,10 +56,8 @@ def figure3e(table, saving_path, name, formats=['png']):
         t = stat_results.Time.unique()
         pval[pval >= 0.05] = np.nan
         for idx, p in enumerate(pval):
-            if p < 0.001:
-                ax.scatter(t[idx], 0.05, marker='_', s=8, c='gold')
-            if (p < 0.05) and (p > 0.001):
-                ax.scatter(t[idx], 0.05, marker='_', s=8, c='darkgoldenrod')
+            if p < 0.05:
+                ax.scatter(t[idx], 0.05, marker='_', s=12, c='black')
     fig.suptitle('Auditory trials by context')
     fig.tight_layout()
 

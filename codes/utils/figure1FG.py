@@ -6,6 +6,7 @@ import scipy.stats as st
 import matplotlib.pyplot as plt
 from codes.utils.misc.fig_saving import save_fig
 from codes.utils.misc.table_saving import save_table, df_to_latex
+pd.set_option("display.float_format", "{:.2e}".format)
 
 
 def plot_figure1fg(data_table, saving_path, name, saving_formats):
@@ -48,6 +49,7 @@ def plot_figure1fg(data_table, saving_path, name, saving_formats):
     avg_data_table.rename(columns={'Whisker_trial': 'Whisker trial index'}, inplace=True)
     df_to_latex(df=avg_data_table, filename=os.path.join(saving_path, 'Figure1F_table.tex'),
                 caption='Figure1F', label='')
+    save_table(avg_data_table, saving_path, f'{name}_results', format=['csv'])
 
     # Statistics:
     to_rewarded_pre = data_table.loc[(data_table.Whisker_trial == -1) &
@@ -61,7 +63,10 @@ def plot_figure1fg(data_table, saving_path, name, saving_formats):
 
     to_rewarded_p = st.ttest_rel(to_rewarded_post, to_rewarded_pre)
     to_nn_rewarded_p = st.ttest_rel(to_nn_rewarded_post, to_nn_rewarded_pre)
-
+    to_rew_dprime = (np.nanmean(to_rewarded_post) - np.nanmean(to_rewarded_pre)) /\
+                    np.sqrt(0.5 * (np.nanstd(to_rewarded_post) ** 2 + np.nanstd(to_rewarded_pre) ** 2))
+    to_norew_dprime = (np.nanmean(to_nn_rewarded_post) - np.nanmean(to_nn_rewarded_pre)) /\
+                    np.sqrt(0.5 * (np.nanstd(to_nn_rewarded_post) ** 2 + np.nanstd(to_nn_rewarded_pre) ** 2))
     print(f'To R+ p-val: {to_rewarded_p}')
     print(f'To R- p-val: {to_nn_rewarded_p}')
 
@@ -78,6 +83,8 @@ def plot_figure1fg(data_table, saving_path, name, saving_formats):
         'std-pre': [np.nanstd(to_rewarded_pre), np.nanstd(to_nn_rewarded_pre)],
         'std-post': [np.nanstd(to_rewarded_post), np.nanstd(to_nn_rewarded_post)],
         'N': [len(to_rewarded_post), len(to_nn_rewarded_post)],
+        'dof': [len(to_rewarded_post) - 1, len(to_nn_rewarded_post) - 1],
+        "d'": [to_rew_dprime, to_norew_dprime],
         'T': [to_rewarded_p[0], to_nn_rewarded_p[0]],
         'p': [to_rewarded_p[1], to_nn_rewarded_p[1]],
         'pcorr': [to_rewarded_p[1] * 2, to_nn_rewarded_p[1] * 2],
@@ -87,7 +94,6 @@ def plot_figure1fg(data_table, saving_path, name, saving_formats):
     save_table(stats_table, saving_path, f'{name}_stat_results', format=['csv'])
 
     # Convert to LaTeX with booktabs and improved names
-    pd.set_option("display.float_format", "{:.2e}".format)
     df_to_latex(df=stats_table, filename=os.path.join(saving_path, 'Figure1G_table.tex'),
                 caption='Figure1G', label='', form={col: lambda x: f"${x:.2e}$" for col in ['p', 'pcorr']})
 

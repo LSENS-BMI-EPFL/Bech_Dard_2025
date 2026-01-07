@@ -5,6 +5,7 @@ import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
 from codes.utils.misc.plot_on_grid import plot_grid_on_allen
+from codes.utils.misc.table_saving import save_table
 
 
 def figure2e(data_table, saving_path):
@@ -14,8 +15,10 @@ def figure2e(data_table, saving_path):
     auditory_lick_df = data_table.loc[data_table.trial_type == 'auditory_trial']
 
     # Group by mouse
-    whisker_piezo_lick_df_mouse = whisker_lick_df.groupby(by=['mouse_id', 'trial_type', 'opto_stim_coord'], as_index=False).agg(np.nanmean)
-    auditory_piezo_lick_df_mouse = auditory_lick_df.groupby(by=['mouse_id', 'trial_type', 'opto_stim_coord'], as_index=False).agg(np.nanmean)
+    whisker_piezo_lick_df_mouse = whisker_lick_df.groupby(by=['mouse_id', 'trial_type', 'opto_stim_coord'],
+                                                          as_index=False).agg('mean')
+    auditory_piezo_lick_df_mouse = auditory_lick_df.groupby(by=['mouse_id', 'trial_type', 'opto_stim_coord'],
+                                                            as_index=False).agg('mean')
 
     # Compute delta contact and dprime for each mouse
     # Whisker
@@ -44,12 +47,12 @@ def figure2e(data_table, saving_path):
     # Whisker
     wh_piezo_rt_df = whisker_piezo_lick_df_mouse.copy()
     wh_piezo_rt_df = wh_piezo_rt_df.drop('mouse_id', axis=1)
-    wh_piezo_rt_df = wh_piezo_rt_df.groupby(by=['trial_type', 'opto_stim_coord'], as_index=False).agg(np.nanmean)
+    wh_piezo_rt_df = wh_piezo_rt_df.groupby(by=['trial_type', 'opto_stim_coord'], as_index=False).agg('mean')
 
     # Auditory
     aud_piezo_rt_df = auditory_piezo_lick_df_mouse.copy()
     aud_piezo_rt_df = aud_piezo_rt_df.drop('mouse_id', axis=1)
-    aud_piezo_rt_df = aud_piezo_rt_df.groupby(by=['trial_type', 'opto_stim_coord'], as_index=False).agg(np.nanmean)
+    aud_piezo_rt_df = aud_piezo_rt_df.groupby(by=['trial_type', 'opto_stim_coord'], as_index=False).agg('mean')
 
     # Put this rt on the grid for each context
     seismic_palette = sns.diverging_palette(265, 10, s=100, l=40, sep=30, n=200, center="light", as_cmap=True)
@@ -98,3 +101,17 @@ def figure2e(data_table, saving_path):
 
     plt.close('all')
 
+    wh_piezo_rt_df = wh_piezo_rt_df.drop(['opto_stim_coord', 'context'], axis=1)
+    aud_piezo_rt_df = aud_piezo_rt_df.drop(['opto_stim_coord', 'context'], axis=1)
+    full_rt_df = pd.concat((wh_piezo_rt_df, aud_piezo_rt_df))
+
+    whdprime_df = whdprime_df.drop('opto_stim_coord', axis=1)
+    whdprime_df['trial_type'] = 'whisker_trial'
+    audprime_df = audprime_df.drop('opto_stim_coord', axis=1)
+    audprime_df['trial_type'] = 'auditory_trial'
+    full_dprime = pd.concat((whdprime_df, audprime_df))
+
+    stats_df = pd.merge(full_rt_df, full_dprime,
+                        on=['trial_type', 'x', 'y'], how='right')
+
+    save_table(stats_df, saving_path, f'lick_time_results', format=['csv'])
