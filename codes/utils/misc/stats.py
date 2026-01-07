@@ -226,7 +226,7 @@ def analyze_both_transitions(data_to_plot, plot=True):
             print(f"  R²: {r_squared:.3f}")
 
     if plot and len(results) > 0:
-        fig, ax = plt.subplots(1, 1, figsize=(7, 5))
+        fig, ax = plt.subplots(1, 1, figsize=(5, 3))
         colors = {'To W+': (0 / 255, 135 / 255, 0 / 255),
                   'To W-': (129 / 255, 0 / 255, 129 / 255)}
 
@@ -272,8 +272,6 @@ def analyze_both_transitions(data_to_plot, plot=True):
         ax.legend(frameon=False, loc='best', fontsize=10)
 
         plt.tight_layout()
-        plt.show()
-
 
     return results, fig
 

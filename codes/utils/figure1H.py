@@ -27,64 +27,43 @@ def plot_figure1h(data_table, saving_path, name, saving_formats):
     cols = ['time_bin', 'lick_flag', 'context', 'whisker_trial']
     bin_averaged_full_data = data_table[cols].groupby(['time_bin', 'context', 'whisker_trial'],
                                                       as_index=False).mean(numeric_only=True)
-    bin_count_full_data = data_table[cols].groupby(['time_bin', 'context', 'whisker_trial'],
-                                                   as_index=False).count()
 
     # Add here dict for time bin and actual time interval
-    x_label_dict = {-1: '10-0', -2: '20-10', -3: '30-20', -4: '40-30',
-                    -5: '50-40', -6: '60-50', -7: '70-60', -8: '80-70', -9: '90-80', -10: '100-90',
-                    1: '0-10', 2: '10-20', 3: '20-30', 4: '30-40',
-                    5: '40-50', 6: '50-60', 7: '60-70', 8: '70-80', 9: '80-90', 10: '90-100'}
+    x_label_dict = {-1: '-10', -2: '-20', -3: '-30', -4: '-40',
+                    -5: '-50', -6: '-60', -7: '-70', -8: '-80', -9: '-90', -10: '-100',
+                    1: '10', 2: '20', 3: '30', 4: '40',
+                    5: '50', 6: '60', 7: '70', 8: '80', 9: '90', 10: '100'}
 
     # Figure: lick probability over time at whisker trials around transitions both way
 
     # Set plot parameters.
     color_palette = [(129 / 255, 0 / 255, 129 / 255), (0 / 255, 135 / 255, 0 / 255)]
     hue_order = ['To W-', 'To W+']
-    pplot_size = 5
-    lw = 2
-    fig_width, fig_height = 3.5, 3.3
 
     data_to_plot = bin_averaged_full_data.loc[(bin_averaged_full_data.time_bin < 6) &
                                               (bin_averaged_full_data.time_bin > -6)].copy()
-    count_to_plot = bin_count_full_data.loc[(bin_count_full_data.time_bin < 6) &
-                                            (bin_count_full_data.time_bin > -6)].copy()
-
     data_to_plot['transition'] = [
         data_to_plot.iloc[i].context.astype(bool) if data_to_plot.iloc[i].whisker_trial == 'first' else not
         data_to_plot.iloc[i].context.astype(bool) for i in range(len(data_to_plot))]
-    count_to_plot['transition'] = [
-        count_to_plot.iloc[i].context.astype(bool) if count_to_plot.iloc[i].whisker_trial == 'first' else not
-        count_to_plot.iloc[i].context.astype(bool) for i in range(len(count_to_plot))]
     data_to_plot['transition'] = data_to_plot['transition'].map({True: 'To W+', False: 'To W-'})
-    count_to_plot['transition'] = count_to_plot['transition'].map({True: 'To W+', False: 'To W-'})
 
-    fig, (ax0, ax1) = plt.subplots(2, 1, figsize=(fig_width, fig_height), height_ratios=[3, 1], sharex=True)
+    fig, ax0 = plt.subplots(1, 1, figsize=(5, 3))
 
     sns.pointplot(data=data_to_plot, x='time_bin', y='lick_flag', hue='transition', hue_order=hue_order,
                   palette=color_palette, markers='o', ax=ax0)
-    sns.barplot(data=count_to_plot, x='time_bin', y='lick_flag', hue='transition', hue_order=hue_order,
-                palette=color_palette, legend=False, ax=ax1)
 
-    positions = [tick for tick in ax1.get_xticks()]
-    new_label = [x_label_dict[int(i.get_text())] for i in ax1.get_xticklabels()]
+    positions = [tick for tick in ax0.get_xticks()]
+    new_label = [x_label_dict[int(i.get_text())] for i in ax0.get_xticklabels()]
     ax0.axvline(x=np.median(positions), ymin=0, ymax=1, c='k', linestyle='--')
     ax0.set_ylim(0, 1.05)
     ax0.set_ylabel('Lick Probability')
-    ax1.xaxis.set_major_locator(FixedLocator(positions))
-    ax1.set_xlabel('Time around transition (s)')
-    ax1.set_xticklabels(new_label, rotation=30)
-    ax1.set_ylim(0, 1200)
-    ax1.set_yticks(np.arange(0, 1200, 200))
-    ax1.set_ylabel('Number of trials')
+    ax0.xaxis.set_major_locator(FixedLocator(positions))
+    ax0.set_xlabel('Time around block switch (s)')
+    ax0.set_xticklabels(new_label, rotation=30)
     sns.despine()
     fig.tight_layout()
 
     results, fit_fig = analyze_both_transitions(data_to_plot, plot=True)
-
-    # Access individual results
-    tau_w_plus = results['To W+']['tau_seconds']  # in seconds
-    tau_w_minus = results['To W-']['tau_seconds']  # in seconds
 
     save_fig(fig, saving_path, figure_name=name, formats=saving_formats)
     save_fig(fit_fig, saving_path, figure_name=f'{name}_fit', formats=saving_formats)

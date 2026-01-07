@@ -38,10 +38,10 @@ def plot_figure1_supp1b(data_table, saving_path, name, saving_formats):
 
 def plot_figure1_supp1c(data_table, saving_path, name, saving_formats):
     # Block duration
-    session_df = data_table.groupby(['mouse_id', 'session_id', 'epoch'], as_index=False).agg(np.nanmean)
+    session_df = data_table.groupby(['mouse_id', 'session_id', 'epoch'], as_index=False).agg('mean')
     mouse_df = session_df.copy()
     mouse_df = mouse_df.drop(['session_id'], axis=1)
-    mouse_df = mouse_df.groupby(['mouse_id', 'epoch'], as_index=False).agg(np.nanmean)
+    mouse_df = mouse_df.groupby(['mouse_id', 'epoch'], as_index=False).agg('mean')
 
     # Duration
     color_palette = [(129 / 255, 0 / 255, 129 / 255), (0 / 255, 135 / 255, 0 / 255)]

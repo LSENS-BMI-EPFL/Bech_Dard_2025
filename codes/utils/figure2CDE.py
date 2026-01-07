@@ -7,7 +7,7 @@ from codes.utils.misc.fig_saving import save_fig
 from codes.utils.misc.table_saving import save_table
 
 
-def figure2cd(data_table, trial_table, saving_path, saving_formats):
+def figure2cde(data_table, trial_table, saving_path, supp_saving_path, saving_formats):
     data_table['shuffle_dist_sub'] = data_table['shuffle_dist_sub'].apply(json.loads)
 
     avg_df = data_table.groupby(by=['context', 'trial_type', 'opto_grid_ml', 'opto_grid_ap']).agg(
@@ -102,9 +102,12 @@ def figure2cd(data_table, trial_table, saving_path, saving_formats):
         for a, row in zip(axes[:, 0], rows):
             a.set_ylabel(row)
 
-    names = ['Figure2C', 'Figure2D', 'Figure2_supp_plick', 'Figure2_supp_density']
-    for idx, panel in enumerate([fig, fig1, fig2, fig3]):
+    names = ['Figure2CDE_delta_plick', 'Figure2CDE_dprime']
+    supp_names = ['Figure2_supp1B', 'Figure2_supp1A']
+    for idx, panel in enumerate([fig, fig1]):
         save_fig(panel, saving_path, names[idx], formats=saving_formats)
+    for idx, panel in enumerate([fig2, fig3]):
+        save_fig(panel, supp_saving_path, supp_names[idx], formats=saving_formats)
 
     plt.close('all')
 

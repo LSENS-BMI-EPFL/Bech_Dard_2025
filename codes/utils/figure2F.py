@@ -8,7 +8,7 @@ from codes.utils.misc.plot_on_grid import plot_grid_on_allen
 from codes.utils.misc.table_saving import save_table
 
 
-def figure2e(data_table, saving_path):
+def figure2f(data_table, saving_path):
 
     data_table = data_table.drop(['stim_onset', 'lick_time'], axis=1)
     whisker_lick_df = data_table.loc[(data_table.context == 1) & (data_table.trial_type == 'whisker_trial')]
@@ -66,7 +66,7 @@ def figure2e(data_table, saving_path):
                        vmin=-0.25, vmax=0.25, fig=fig, ax=ax)
     fig.suptitle('Whisker trials')
     fig.tight_layout()
-    fig.savefig(os.path.join(saving_path, 'Figure2E_whisker_effect.png'), dpi=400)
+    fig.savefig(os.path.join(saving_path, 'Figure2F_whisker_effect.png'), dpi=400)
 
     fig, ax = plt.subplots(1, 1, figsize=(3, 3))
     whdprime_df['y'] = whdprime_df['opto_stim_coord'].apply(lambda x: ast.literal_eval(x)[0])
@@ -76,7 +76,7 @@ def figure2e(data_table, saving_path):
                        vmin=0.5, vmax=2.2, fig=fig, ax=ax)
     fig.suptitle('Whisker trials')
     fig.tight_layout()
-    fig.savefig(os.path.join(saving_path, 'Figure2E_whisker_dprime.png'), dpi=400)
+    fig.savefig(os.path.join(saving_path, 'Figure2F_whisker_dprime.png'), dpi=400)
 
     # Auditory
     fig, ax = plt.subplots(1, 1, figsize=(3, 3))
@@ -87,7 +87,7 @@ def figure2e(data_table, saving_path):
                        vmin=-0.25, vmax=0.25, fig=fig, ax=ax)
     fig.suptitle('Auditory trials')
     fig.tight_layout()
-    fig.savefig(os.path.join(saving_path, 'Figure2E_auditory_effect.png'), dpi=400)
+    fig.savefig(os.path.join(saving_path, 'Figure2F_auditory_effect.png'), dpi=400)
 
     fig, ax = plt.subplots(1, 1, figsize=(3, 3))
     audprime_df['y'] = audprime_df['opto_stim_coord'].apply(lambda x: ast.literal_eval(x)[0])
@@ -97,7 +97,7 @@ def figure2e(data_table, saving_path):
                        vmin=0.5, vmax=2.2, fig=fig, ax=ax)
     fig.suptitle('Auditory trials')
     fig.tight_layout()
-    fig.savefig(os.path.join(saving_path, 'Figure2E_auditory_dprime.png'), dpi=400)
+    fig.savefig(os.path.join(saving_path, 'Figure2F_auditory_dprime.png'), dpi=400)
 
     plt.close('all')
 

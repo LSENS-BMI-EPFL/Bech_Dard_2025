@@ -10,7 +10,7 @@ from codes.utils.misc.fig_saving import save_fig
 from codes.utils.misc.plot_utils import *
 
 
-def plot_figure2_supp1ab(data_table, saving_path, saving_formats):
+def plot_figure2_supp1cd(data_table, saving_path, saving_formats):
     data_table['shuffle_dist_sub'] = data_table['shuffle_dist_sub'].apply(json.loads)
 
     avg_df = data_table.groupby(by=['context', 'trial_type', 'opto_grid_ml', 'opto_grid_ap']).agg(
@@ -75,14 +75,14 @@ def plot_figure2_supp1ab(data_table, saving_path, saving_formats):
         for a, row in zip(axes[:, 0], rows):
             a.set_ylabel(row)
 
-    names = ['Figure2_supp1A', 'Figure2_supp1B']
+    names = ['Figure2_supp1C', 'Figure2_supp1D']
     for idx, panel in enumerate([fig, fig1]):
         save_fig(panel, saving_path, names[idx], formats=saving_formats)
 
     plt.close('all')
 
 
-def plot_figure2_supp1cde(muscimol, ringer, saving_path, sites, names, saving_formats):
+def plot_figure2_supp1efg(muscimol, ringer, saving_path, sites, names, saving_formats):
     for idx, site in enumerate(sites):
         muscimol_path = os.path.join(muscimol, f'{site}_Average mice behavior', 'context_days_full_table.csv')
         ringer_path = os.path.join(ringer, f'{site}_general_average_across_days.csv')
@@ -158,12 +158,11 @@ def plot_figure2_supp1cde(muscimol, ringer, saving_path, sites, names, saving_fo
         save_fig(figure, saving_path, f'Figure2_supp1{names[idx]}_right', formats=saving_formats)
 
 
-def plot_figure2_supp2a(data_table, saving_path, name, saving_formats):
+def plot_figure2_supp1h_tc(data_table, saving_path, name, saving_formats):
     data_table = data_table.loc[data_table.trial_type == 'whisker_trial']
 
     selected_spots = ['(-1.5, 3.5)', '(-1.5, 4.5)', '(1.5, 1.5)', '(-1.5, 0.5)', '(2.5, 2.5)', '(0.5, 4.5)']
     contexts = [1, 0]
-    # bodyparts = ['whisker_velocity', 'jaw_y', 'tongue_distance']
     bodyparts = ['jaw_y']
     combinations = list(itertools.product(contexts, bodyparts, selected_spots))
 
@@ -201,20 +200,6 @@ def plot_figure2_supp2a(data_table, saving_path, name, saving_formats):
         ax.set_title(f'{"W+" if combinations[ax_idx][0] == 1 else "W-"}\n'
                      f'{combinations[ax_idx][2]}')
 
-    # for ax in axes[0, :].flatten():
-    #     ax.set_ylim(-0.2, 1.4)
-    # for ax in axes[1, :].flatten():
-    #     ax.set_ylim(-0.16, 2.8)
-    # for ax in axes[2, :].flatten():
-    #     ax.set_ylim(-0.8, 15)
-    #
-    # for ax in axes[3, :].flatten():
-    #     ax.set_ylim(-0.2, 1.4)
-    # for ax in axes[4, :].flatten():
-    #     ax.set_ylim(-0.2, 2.8)
-    # for ax in axes[5, :].flatten():
-    #     ax.set_ylim(-0.8, 15)
-
     for ax in axes.flatten():
         ax.set_ylim(-0.16, 2)
 
@@ -224,15 +209,15 @@ def plot_figure2_supp2a(data_table, saving_path, name, saving_formats):
     save_fig(fig, saving_path, name, formats=saving_formats)
 
 
-def plot_figure2_supp2b(data_table, saving_path, name, saving_formats):
+def plot_figure2_supp1h_auc(data_table, saving_path, name, saving_formats):
     data_table = data_table.loc[data_table.trial_type == 'whisker_trial']
 
     selected_spots = ['(-5.0, 5.0)', '(-1.5, 3.5)', '(-1.5, 4.5)', '(1.5, 1.5)', '(-1.5, 0.5)', '(2.5, 2.5)',
                       '(0.5, 4.5)']
     sub_df = data_table.loc[data_table.opto_stim_coord.isin(selected_spots)].copy()
 
-    # bodyparts_to_plot = ['whisker_velocity', 'jaw_y', 'tongue_distance']
     bodyparts_to_plot = ['jaw_y']
+
     for context in sub_df.context.unique():
         sub_df_ctx = sub_df.loc[sub_df.context == context].copy()
         for bpart in bodyparts_to_plot:
@@ -296,10 +281,9 @@ def plot_figure2_supp2b(data_table, saving_path, name, saving_formats):
                 os.path.join(saving_path, f'{name}_{bpart}_{"W-" if context == 0 else "W+"}_stat_results.csv'))
 
 
-def plot_figure2_supp2c(data_table, saving_path, name, saving_formats):
+def plot_figure2_supp1h_grid(data_table, saving_path, name, saving_formats):
     data_table = data_table.loc[data_table.trial_type == 'whisker_trial']
 
-    # bodyparts_to_plot = ['whisker_velocity', 'jaw_y', 'tongue_distance']
     bodyparts_to_plot = ['jaw_y']
 
     seismic_palette = sns.diverging_palette(265, 10, s=100, l=40, sep=30, n=200, center="light", as_cmap=True)
