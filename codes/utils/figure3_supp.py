@@ -4,7 +4,8 @@ import pandas as pd
 import seaborn as sns
 import numpy as np
 
-from codes.utils.misc.plot_average_widefield_timecourse import plot_average_wf_timecourse
+from codes.utils.misc.plot_average_widefield_timecourse import plot_average_wf_timecourse, \
+    plot_wf_timecourse_aud_wh_diff
 from codes.utils.misc.stats import psth_context_stats
 from codes.utils.misc.fig_saving import save_fig
 
@@ -165,5 +166,17 @@ def wh_psth_by_trial_index(df, sorted_areas, save_folder, name, formats, pre_sti
     fig.figure.suptitle(f'0-120ms PSTH peak across trials', size=12)
     fig.tight_layout()
     save_fig(fig, saving_path=save_folder, figure_name=f'{name}_psths_peak', formats=formats)
+
+
+def wf_timecourse_auditory_to_whisker(aud_data, whisker_data, saving_path, formats=['png'],
+                                      halfrange=0.03):
+    # Keep only correct trial types in W+ context:
+    wh_trial_types = ['rewarded_whisker_hit_trial']
+    aud_trial_types = ['rewarded_auditory_hit_trial']
+
+    # PLot difference
+    plot_wf_timecourse_aud_wh_diff(aud_data, whisker_data, aud_trial_types, wh_trial_types,
+                                   saving_path, formats=formats,
+                                   diff_range=halfrange)
 
 

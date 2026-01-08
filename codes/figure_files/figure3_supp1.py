@@ -69,3 +69,19 @@ if not os.path.exists(result_folder):
     os.makedirs(result_folder)
 figure3_supp.wh_psth_by_trial_index(df, sorted_areas, save_folder=result_folder,
                                     name='wh_over_block', formats=['png', 'svg'], pre_stim=5)
+
+# Difference between W+ auditory hits and whisker hits
+aud_data_path = os.path.join(main_dir, 'data', 'figure3', '3E_images')
+aud_data_dict = np.load(os.path.join(aud_data_path, 'general_data_dict.npy'), allow_pickle=True).item()
+
+wh_data_path = os.path.join(main_dir, 'data', 'figure3', '3F_images')
+wh_data_dict = np.load(os.path.join(wh_data_path, 'general_data_dict.npy'), allow_pickle=True).item()
+
+result_folder = os.path.join(fig_folder, 'Reviewing')
+if not os.path.exists(result_folder):
+    os.makedirs(result_folder)
+
+figure3_supp.wf_timecourse_auditory_to_whisker(aud_data=aud_data_dict,
+                                               whisker_data=wh_data_dict,
+                                               saving_path=result_folder)
+

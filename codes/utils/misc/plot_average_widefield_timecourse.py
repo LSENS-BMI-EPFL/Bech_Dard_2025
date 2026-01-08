@@ -68,3 +68,66 @@ def plot_average_wf_timecourse(data, trial_types, saving_path, formats=['png'],
             plot_wf_single_frame(frame=filtered_first_frame, title='Figure3H_map', figure=fig, ax_to_plot=ax, suptitle=' ',
                                  saving_path=os.path.dirname(saving_path), save_formats=['png'], colormap='binary_r',
                                  vmin=0.03, vmax=0.08, cbar_shrink=0.7, separated_plots=True, nan_c='white')
+
+
+def plot_wf_timecourse_aud_wh_diff(aud_data, wh_data, aud_trials, wh_trials, saving_path, formats=['png'],
+                                   diff_range=0.03):
+    # WHISKER DATA
+    mice_avg_data_dict = dict()
+    for trial in wh_trials:
+        mice_avg_data_dict.setdefault(trial, [])
+
+    for mouse_id, trial_type_data_dict in wh_data.items():
+        print(f'Mouse: {mouse_id}')
+        for trial_type, mouse_data in trial_type_data_dict.items():
+            if trial_type not in wh_trials:
+                continue
+            print(f'Trial type: {trial_type}, {len(mouse_data)} sessions')
+            mouse_avg_data = [mouse_data[sess][1] for sess in range(len(mouse_data))]
+            mouse_avg_data = np.stack(mouse_avg_data)
+            with warnings.catch_warnings():
+                warnings.simplefilter("ignore", category=RuntimeWarning)
+                mouse_avg_data = np.nanmean(mouse_avg_data, axis=0)
+            mice_avg_data_dict[trial_type].append(mouse_avg_data)
+
+    for trial_type, data in mice_avg_data_dict.items():
+        data = np.stack(data)
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore", category=RuntimeWarning)
+            data = np.nanmean(data, axis=0)
+        mice_avg_data_dict[trial_type] = data
+
+    # AUDITORY DATA
+    mice_avg_data_dict_auditory = dict()
+    for trial in aud_trials:
+        mice_avg_data_dict_auditory.setdefault(trial, [])
+
+    for mouse_id, trial_type_data_dict in aud_data.items():
+        print(f'Mouse: {mouse_id}')
+        for trial_type, mouse_data in trial_type_data_dict.items():
+            print(f'Trial type: {trial_type}, {len(mouse_data)} sessions')
+            if trial_type not in aud_trials:
+                print('Trial type not correct')
+                continue
+            mouse_avg_data = [mouse_data[sess][1] for sess in range(len(mouse_data))]
+            mouse_avg_data = np.stack(mouse_avg_data)
+            with warnings.catch_warnings():
+                warnings.simplefilter("ignore", category=RuntimeWarning)
+                mouse_avg_data = np.nanmean(mouse_avg_data, axis=0)
+            mice_avg_data_dict_auditory[trial_type].append(mouse_avg_data)
+
+    for trial_type, data in mice_avg_data_dict_auditory.items():
+        data = np.stack(data)
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore", category=RuntimeWarning)
+            data = np.nanmean(data, axis=0)
+        mice_avg_data_dict_auditory[trial_type] = data
+
+    data_to_plot = mice_avg_data_dict['rewarded_whisker_hit_trial'] - mice_avg_data_dict_auditory[
+        'rewarded_auditory_hit_trial']
+
+    plot_wf_avg(avg_data=data_to_plot, output_path=saving_path, n_frames_post_stim=12, n_frames_averaged=2,
+                key='Reviewing', center_frame=10, halfrange=diff_range, colormap='seismic',
+                figname=f'all_mice_whisker_auditory_diff',
+                save_formats=formats, subdir='whisker_auditory_diff')
+
