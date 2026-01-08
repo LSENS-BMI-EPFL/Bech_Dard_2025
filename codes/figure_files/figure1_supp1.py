@@ -48,5 +48,8 @@ figure1_supp.plot_figure1_supp1d(data_table=df, saving_path=fig_folder, name='Fi
 # LOAD DATA :
 table_path = os.path.join(main_dir, 'data', 'figure1', '1B')
 df = pd.read_csv(os.path.join(table_path, 'concatenated_bhv_tables.csv'), index_col=0)
-figure1_supp.dprime_criterion(data_table=df, saving_path=fig_folder,
+result_folder = os.path.join(fig_folder, 'Reviewing')
+if not os.path.exists(result_folder):
+    os.makedirs(result_folder)
+figure1_supp.dprime_criterion(data_table=df, saving_path=result_folder,
                               name='whisker_dprime', saving_formats=['png', 'svg'])
