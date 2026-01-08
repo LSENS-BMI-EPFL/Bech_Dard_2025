@@ -47,16 +47,6 @@ def plot_average_wf_timecourse(data, trial_types, saving_path, formats=['png'],
                     center_frame=10,
                     c_scale=scale, figname=f'all_mice_{key}', save_formats=formats, subdir=key)
 
-    # TIMECOURSES CONTEXT DIFFERENCE
-    context_diff_dict = mice_avg_data_dict.copy()
-    context_diff_dict['R+ - R-'] = mice_avg_data_dict[rewarded_key] - mice_avg_data_dict[non_rewarded_key]
-    for key, data in context_diff_dict.items():
-        if key == 'R+ - R-':
-            plot_wf_avg(avg_data=data, output_path=saving_path, n_frames_post_stim=12, n_frames_averaged=2,
-                        key=key, center_frame=10,
-                        colormap='seismic', halfrange=diff_range, figname=f'all_mice_{key}', save_formats=formats,
-                        subdir=key)
-
     # TIMECOURSES D'
     rew_data = np.stack(rew_data_dict)
     norew_data = np.stack(norew_data_dict)
@@ -65,20 +55,15 @@ def plot_average_wf_timecourse(data, trial_types, saving_path, formats=['png'],
                 key='dprime', center_frame=10,
                 colormap='viridis', c_scale=(0, 3.5), figname='all_mice_dprime', save_formats=formats, subdir='dprime')
 
-    # FIRST TIME D' ABOVE 2
-    first_frame = first_above_threshold_frame(d=d_prime, threshold=2, start_frame=12)
-    first_frame = first_frame / 100 + 2 / 100
-    filtered_first_frame = gaussian_filter(first_frame, sigma=1)
-    t_sig_save_path = os.path.join(saving_path, 'dprime')
-    if not os.path.exists(t_sig_save_path):
-        os.makedirs(t_sig_save_path)
-    fig, ax = plt.subplots(1, 1, figsize=(5, 5))
-    plot_wf_single_frame(frame=filtered_first_frame, title='Sig', figure=fig, ax_to_plot=ax, suptitle='time',
-                         saving_path=t_sig_save_path, save_formats=['png'], colormap='Reds_r',
-                         vmin=0.03, vmax=0.08, cbar_shrink=0.7, separated_plots=True, nan_c='white')
-
     if os.path.basename(saving_path) == '3F':
+        # FIRST TIME D' ABOVE 2
+        first_frame = first_above_threshold_frame(d=d_prime, threshold=2, start_frame=12)
+        first_frame = first_frame / 100 + 2 / 100
+        filtered_first_frame = gaussian_filter(first_frame, sigma=1)
+        t_sig_save_path = os.path.join(saving_path, 'dprime')
+        if not os.path.exists(t_sig_save_path):
+            os.makedirs(t_sig_save_path)
         fig, ax = plt.subplots(1, 1, figsize=(5, 5))
-        plot_wf_single_frame(frame=filtered_first_frame, title='Figure3H', figure=fig, ax_to_plot=ax, suptitle=' ',
+        plot_wf_single_frame(frame=filtered_first_frame, title='Figure3H_map', figure=fig, ax_to_plot=ax, suptitle=' ',
                              saving_path=os.path.dirname(saving_path), save_formats=['png'], colormap='binary_r',
                              vmin=0.03, vmax=0.08, cbar_shrink=0.7, separated_plots=True, nan_c='white')

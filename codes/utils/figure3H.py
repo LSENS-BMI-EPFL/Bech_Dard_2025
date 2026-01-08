@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 from codes.utils.misc.fig_saving import save_fig
 
 
-def figure3i(df, saving_path, name, formats):
+def figure3h_barplots(df, saving_path, name, formats):
     df = df.loc[df.Time > 0.02]
 
     # Significant level :

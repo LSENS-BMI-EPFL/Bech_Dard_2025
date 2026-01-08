@@ -1,68 +1,129 @@
+import os
 import ast
 import numpy as np
+import pandas as pd
 import matplotlib.pyplot as plt
-import seaborn as sns
-from codes.utils.misc.stats import psth_context_stats
 from codes.utils.misc.fig_saving import save_fig
 from codes.utils.misc.table_saving import save_table
 
 
-def figure3g(table, saving_path, name, formats=['png']):
-    table = table.drop(['event', 'roi', 'behavior_type', 'behavior_day'], axis=1)
+def figure3g(auditory_df, whisker_df, saving_path, name, formats=['png', 'svg']):
+    t_start = 0.05
+    t_stop = 0.12
 
-    # Select time
-    table = table.loc[(table.time > -0.09) & (table.time < 0.160)]
+    # DROP
+    auditory_df = auditory_df.drop(['event', 'roi', 'behavior_type', 'behavior_day'], axis=1)
+    whisker_df = whisker_df.drop(['event', 'roi', 'behavior_type', 'behavior_day'], axis=1)
 
-    # Average within session
-    session_df = table.groupby(['time', 'mouse_id', 'session_id', 'cell_type', 'trial_type', 'epoch'],
-                               as_index=False).agg('mean')
+    # DATA:
+    # Whisker
+    wh_session_df = whisker_df.groupby(['time', 'mouse_id', 'session_id', 'cell_type', 'trial_type', 'epoch'],
+                                       as_index=False).agg('mean')
+    wh_mouse_df = wh_session_df.copy()
+    wh_mouse_df = wh_mouse_df.drop(['session_id'], axis=1)
+    wh_mouse_df = wh_mouse_df.groupby(['time', 'mouse_id', 'cell_type', 'trial_type', 'epoch'],
+                                      as_index=False).agg('mean')
+    wh_coord_mouse_df = wh_mouse_df.copy(deep=True)
+    wh_coord_mouse_df['AP'] = wh_mouse_df['cell_type'].apply(lambda x: ast.literal_eval(x)[0])
+    wh_coord_mouse_df['ML'] = wh_mouse_df['cell_type'].apply(lambda x: ast.literal_eval(x)[1])
+    correct_wh_df = wh_coord_mouse_df.loc[
+        ((wh_coord_mouse_df.trial_type == 'whisker_hit_trial') & (wh_coord_mouse_df.epoch == 'rewarded')) | (
+                    (wh_coord_mouse_df.trial_type == 'whisker_miss_trial') & (
+                        wh_coord_mouse_df.epoch == 'non-rewarded'))]
+    # Whisker peak
+    wh_avg_table_response = correct_wh_df.loc[(correct_wh_df.time > t_start) & (correct_wh_df.time < t_stop)]
+    wh_max_response_table = wh_avg_table_response.loc[
+        wh_avg_table_response.groupby(['mouse_id', 'cell_type', 'trial_type', 'epoch', 'AP', 'ML'])[
+            "activity"].idxmax()]
 
-    # Average within mouse
-    mouse_df = session_df.copy()
-    mouse_df = mouse_df.drop(['session_id'], axis=1)
-    mouse_df = mouse_df.groupby(['time', 'mouse_id', 'cell_type', 'trial_type', 'epoch'], as_index=False).agg(
-        'mean')
+    # Auditory
+    aud_session_df = auditory_df.groupby(['time', 'mouse_id', 'session_id', 'cell_type', 'trial_type', 'epoch'],
+                                         as_index=False).agg('mean')
+    aud_mouse_df = aud_session_df.copy()
+    aud_mouse_df = aud_mouse_df.drop(['session_id'], axis=1)
+    aud_mouse_df = aud_mouse_df.groupby(['time', 'mouse_id', 'cell_type', 'trial_type', 'epoch'],
+                                        as_index=False).agg('mean')
+    aud_coord_mouse_df = aud_mouse_df.copy(deep=True)
+    aud_coord_mouse_df['AP'] = aud_coord_mouse_df['cell_type'].apply(lambda x: ast.literal_eval(x)[0])
+    aud_coord_mouse_df['ML'] = aud_coord_mouse_df['cell_type'].apply(lambda x: ast.literal_eval(x)[1])
+    correct_aud_df = aud_coord_mouse_df.loc[aud_coord_mouse_df.trial_type == 'auditory_hit_trial']
+    aud_avg_table_response = correct_aud_df.loc[(correct_aud_df.time > t_start) & (correct_aud_df.time < t_stop)]
+    aud_max_response_table = aud_avg_table_response.loc[
+        aud_avg_table_response.groupby(['mouse_id', 'cell_type', 'trial_type', 'epoch', 'AP', 'ML'])[
+            "activity"].idxmax()]
 
-    # Add AP / ML coordinates
-    coord_mouse_df = mouse_df.copy(deep=True)
-    coord_mouse_df['AP'] = mouse_df['cell_type'].apply(lambda x: ast.literal_eval(x)[0])
-    coord_mouse_df['ML'] = mouse_df['cell_type'].apply(lambda x: ast.literal_eval(x)[1])
-    data_to_plot = coord_mouse_df.loc[
-        ((coord_mouse_df.trial_type == 'whisker_hit_trial') & (coord_mouse_df.epoch == 'rewarded')) |
-        ((coord_mouse_df.trial_type == 'whisker_miss_trial') & (coord_mouse_df.epoch == 'non-rewarded'))
-        ]
+    full_peak_df = pd.concat([wh_max_response_table, aud_max_response_table], ignore_index=True)
+    selected_spots = ['(-2.5, 5.5)', '(-1.5, 3.5)', '(-1.5, 4.5)', '(1.5, 1.5)', '(-1.5, 0.5)', '(2.5, 2.5)',
+                      '(0.5, 4.5)']
+    sel_full_peak_df = full_peak_df.loc[full_peak_df.cell_type.isin(selected_spots)]
+    saved_table = sel_full_peak_df.copy()
+    saved_table.rename(columns={'time': 'Peak time (s)',
+                                'mouse_id': 'Mouse',
+                                'cell_type': 'Area',
+                                'trial_type': 'Trial type',
+                                'epoch': 'Context',
+                                'activity': 'Dff'}, inplace=True)
+    save_table(df=saved_table, saving_path=saving_path, name=f'{name}_data')
 
-    # Select grid points
-    selected_spots = ['(-1.5, 3.5)', '(-1.5, 4.5)', '(1.5, 1.5)', '(-1.5, 0.5)', '(2.5, 2.5)', '(0.5, 4.5)']
-    data_to_plot = data_to_plot.loc[data_to_plot.cell_type.isin(selected_spots)]
+    colors = {'(-1.5, 0.5)': 'pink',
+              '(-1.5, 3.5)': 'darkorange',
+              '(-1.5, 4.5)': 'orange',
+              '(0.5, 4.5)': 'red',
+              '(1.5, 1.5)': 'blue',
+              '(2.5, 2.5)': 'mediumorchid',
+              '(-2.5, 5.5)': 'cyan'}
 
-    # Do the stats W+ vs W-
-    stat_results = psth_context_stats(df=data_to_plot, grid_spot=selected_spots)
-    save_table(df=stat_results, saving_path=saving_path, name=f'{name}_stats')
-
-    # Plot
-    fig, axes = plt.subplots(2, 3, sharex=True, sharey=True, figsize=(4, 6))
-    color_palette = [(129 / 255, 0 / 255, 129 / 255), (0 / 255, 135 / 255, 0 / 255)]
-    for ax_idx, ax in enumerate(axes.flatten()):
-        data = data_to_plot.loc[data_to_plot.cell_type == selected_spots[ax_idx]]
-        sns.lineplot(data, x='time', y='activity', hue='epoch', hue_order=['non-rewarded', 'rewarded'],
-                     palette=color_palette, legend=False, ax=ax)
-        sns.despine()
-        ax.axvline(x=0, ymin=0, ymax=1, c='orange', linestyle='--')
-        ax.set_xlim(-0.1, 0.180)
-        ax.set_ylim(-0.01, 0.052)
-        ax.set_yticks([0.00, 0.01, 0.02, 0.03, 0.04, 0.05], labels=['0.0', '1.0', '2.0', '3.0', '4.0', '5.0'])
-        ax.set_ylabel('DF/F0 (%)')
-        ax.set_xlabel('Time (ms)')
-        ax.set_title(f'{ast.literal_eval(selected_spots[ax_idx])[0]} / {ast.literal_eval(selected_spots[ax_idx])[1]}')
-        pval = stat_results.loc[stat_results.Spot == selected_spots[ax_idx]]['p corr'].values
-        t = stat_results.Time.unique()
-        pval[pval >= 0.05] = np.nan
-        for idx, p in enumerate(pval):
-            if p < 0.05:
-                ax.scatter(t[idx], 0.05, marker='_', s=12, c='black')
-    fig.suptitle('Whisker trials by context')
+    # By context
+    fig, axes = plt.subplots(1, 2, figsize=(6, 3), sharey=True, sharex=True)
+    for idx, context in enumerate(list(sel_full_peak_df.epoch.unique())):
+        whisker_trial = 'whisker_hit_trial' if context == 'rewarded' else 'whisker_miss_trial'
+        for c_idx, roi in enumerate(list(sel_full_peak_df.cell_type.unique())):
+            color = colors.get(roi)
+            xval = sel_full_peak_df.loc[(sel_full_peak_df.epoch == context) & (sel_full_peak_df.cell_type == roi) & (
+                        sel_full_peak_df.trial_type == 'auditory_hit_trial'), 'activity'].values[:]
+            yval = sel_full_peak_df.loc[(sel_full_peak_df.epoch == context) & (sel_full_peak_df.cell_type == roi) & (
+                        sel_full_peak_df.trial_type == whisker_trial), 'activity'].values[:]
+            axes.flatten()[idx].scatter(xval, yval, color=color, label=roi)
+            axes.flatten()[idx].plot(np.arange(0, 0.055, 1 / 100), np.arange(0, 0.055, 1 / 100), c='k', linestyle='--')
+            axes.flatten()[idx].spines[['top', 'right']].set_visible(False)
+            axes.flatten()[idx].set_title(f'{"W-" if "non" in context else "W+"}')
+            axes.flatten()[idx].set_xlim(0, 0.055)
+            axes.flatten()[idx].set_ylim(0, 0.055)
+            axes.flatten()[idx].set_yticks(np.arange(0, 0.06, 1 / 100))
+            axes.flatten()[idx].set_xticks(np.arange(0, 0.06, 1 / 100))
+    for ax in axes.flatten():
+        ax.set_xlabel('Auditory')
+        ax.set_ylabel('Whisker')
     fig.tight_layout()
 
-    save_fig(fig, saving_path=saving_path, figure_name=name, formats=formats)
+    save_fig(fig, saving_path=saving_path, figure_name=f'{name}_context', formats=formats)
+
+    # By trial type
+    fig, axes = plt.subplots(1, 2, figsize=(6, 3), sharey=True, sharex=True)
+    for c_idx, roi in enumerate(list(sel_full_peak_df.cell_type.unique())):
+        color = colors.get(roi)
+        xval = sel_full_peak_df.loc[(sel_full_peak_df.epoch == 'non-rewarded') & (sel_full_peak_df.cell_type == roi) & (
+                    sel_full_peak_df.trial_type == 'auditory_hit_trial'), 'activity'].values[:]
+        yval = sel_full_peak_df.loc[(sel_full_peak_df.epoch == 'rewarded') & (sel_full_peak_df.cell_type == roi) & (
+                    sel_full_peak_df.trial_type == 'auditory_hit_trial'), 'activity'].values[:]
+        axes.flatten()[0].scatter(xval, yval, color=color)
+        axes.flatten()[0].set_title(f'Auditory')
+        xval = sel_full_peak_df.loc[(sel_full_peak_df.epoch == 'non-rewarded') & (sel_full_peak_df.cell_type == roi) & (
+                    sel_full_peak_df.trial_type == 'whisker_miss_trial'), 'activity'].values[:]
+        yval = sel_full_peak_df.loc[(sel_full_peak_df.epoch == 'rewarded') & (sel_full_peak_df.cell_type == roi) & (
+                    sel_full_peak_df.trial_type == 'whisker_hit_trial'), 'activity'].values[:]
+        axes.flatten()[1].scatter(xval, yval, color=color, label=roi)
+        axes.flatten()[1].set_title(f'Whisker')
+    for idx, ax in enumerate(axes.flatten()):
+        ax.set_xlabel('W-')
+        ax.set_ylabel('W+')
+        ax.plot(np.arange(0, 0.055, 1 / 100), np.arange(0, 0.055, 1 / 100), c='k', linestyle='--')
+        ax.set_xlim(0, 0.055)
+        ax.set_ylim(0, 0.055)
+        axes.flatten()[idx].set_yticks(np.arange(0, 0.06, 1 / 100))
+        axes.flatten()[idx].set_xticks(np.arange(0, 0.06, 1 / 100))
+        ax.spines[['top', 'right']].set_visible(False)
+    fig.tight_layout()
+
+    save_fig(fig, saving_path=saving_path, figure_name=f'{name}_trials', formats=formats)
 
