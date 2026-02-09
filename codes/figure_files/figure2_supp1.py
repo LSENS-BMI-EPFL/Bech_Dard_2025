@@ -36,3 +36,15 @@ figure2_supp.plot_figure2_supp1h_auc(data_table=df, saving_path=fig_folder, name
 # 1H grid representation
 figure2_supp.plot_figure2_supp1h_grid(data_table=df, saving_path=fig_folder, name='Figure2_supp1H_grid',
                                       saving_formats=['png'])
+
+# Delta pLick barplots
+# LOAD DATA :
+table_path = os.path.join(main_dir, 'data', 'figure2', '2CDE')
+df = pd.read_csv(os.path.join(table_path, 'optogrid_data_table_VGAT.csv'), index_col=0)
+result_folder = os.path.join(fig_folder, 'Reviewing')
+if not os.path.exists(result_folder):
+    os.makedirs(result_folder)
+figure2_supp.figure2supp_dplick_barplots(data_table=df, saving_path=result_folder, name='Figure2_supp_dplick_barplots',
+                                         saving_formats=['png', 'svg'])
+
+

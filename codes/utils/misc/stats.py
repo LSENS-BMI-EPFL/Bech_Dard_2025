@@ -68,7 +68,6 @@ def first_above_threshold_frame(d, threshold, start_frame):
 
 def psth_context_stats(df, grid_spot):
     ts = df.time.unique()
-    ts = ts[ts > 0]
     n_ts = len(ts)
     spot_list = []
     ts_list = []
@@ -137,66 +136,83 @@ def exponential_decay(t, A, tau, C):
     return A * np.exp(-t / tau) + C
 
 
-def fit_transition_adaptation(data_to_plot, transition_type='To W+'):
+def fit_transition_adaptation(data_to_plot, transition_type='To W+', fit_start=1, include_bin_minus_one=True):
     """
-    Fit exponential decay to positive time bins for a given transition type.
+    Fit exponential decay starting from bin -1 (as t=0) through positive bins.
 
     Parameters:
     - data_to_plot: DataFrame with columns ['time_bin', 'lick_flag', 'transition']
     - transition_type: 'To W+' or 'To W-'
+    - fit_start: starting bin for positive bins (default 1)
+    - include_bin_minus_one: if True, include bin -1 as t=0 in the fit
 
     Returns:
     - tau: time constant in bins (multiply by 10 for seconds)
     - params: all fitted parameters [A, tau, C]
     - fit_quality: R-squared value
     """
-    # Filter for positive time bins and specific transition
-    data_subset = data_to_plot[(data_to_plot['time_bin'] > 0) &
-                               (data_to_plot['transition'] == transition_type)].copy()
+    # Get bin -1
+    bin_minus_one = data_to_plot[(data_to_plot['time_bin'] == -1) &
+                                 (data_to_plot['transition'] == transition_type)]
 
-    # Sort by time_bin to ensure proper ordering
+    # Get positive bins for fitting
+    data_positive = data_to_plot[(data_to_plot['time_bin'] >= fit_start) &
+                                 (data_to_plot['transition'] == transition_type)].copy()
+
+    if include_bin_minus_one and len(bin_minus_one) > 0:
+        # Combine bin -1 with positive bins
+        data_subset = pd.concat([bin_minus_one, data_positive])
+    else:
+        data_subset = data_positive
+
+    # Sort by time_bin
     data_subset = data_subset.sort_values('time_bin')
 
-    x = data_subset['time_bin'].values
+    x_original = data_subset['time_bin'].values
     y = data_subset['lick_flag'].values
 
+    # Transform to continuous time starting from 0
+    # bin -1 -> t=0 (10 seconds before transition)
+    # bin 1 -> t=1 (10 seconds after transition, so 20 seconds from start)
+    # bin 2 -> t=2, bin 3 -> t=3, etc.
+    # We need to account for the actual time represented
+    x_transformed = np.where(x_original < 0, 0, x_original)
+
     # Initial parameter guesses
-    # A: initial change from baseline
-    # tau: time constant (start with ~3 bins = 30 seconds)
-    # C: asymptotic value (final lick probability)
-    y_start = y[0]
+    y_start = y[0]  # Value at bin -1
     y_end = y[-1]
     A_init = y_start - y_end
     tau_init = 3.0
     C_init = y_end
 
     try:
-        # Fit the exponential decay
+        # Fit the exponential decay using transformed x
         params, covariance = curve_fit(
             exponential_decay,
-            x,
+            x_transformed,
             y,
             p0=[A_init, tau_init, C_init],
-            bounds=([-np.inf, 0.1, -np.inf], [np.inf, 50, np.inf]),  # tau must be positive
+            bounds=([-np.inf, 0.1, -np.inf], [np.inf, 50, np.inf]),
             maxfev=10000
         )
 
         A_fit, tau_fit, C_fit = params
 
         # Calculate R-squared
-        y_pred = exponential_decay(x, *params)
+        y_pred = exponential_decay(x_transformed, *params)
         ss_res = np.sum((y - y_pred) ** 2)
         ss_tot = np.sum((y - np.mean(y)) ** 2)
         r_squared = 1 - (ss_res / ss_tot)
 
-        return tau_fit, params, r_squared, x, y
+        # Return original bin values along with fitted parameters
+        return tau_fit, params, r_squared, x_original, y
 
     except Exception as e:
         print(f"Fitting failed for {transition_type}: {str(e)}")
-        return None, None, None, x, y
+        return None, None, None, x_original, y
 
 
-def analyze_both_transitions(data_to_plot, plot=True):
+def analyze_both_transitions(data_to_plot, plot=True, start_fit=1, include_bin_minus_one=True):
     """
     Analyze both transition types and optionally plot results.
 
@@ -205,12 +221,13 @@ def analyze_both_transitions(data_to_plot, plot=True):
     results = {}
 
     for transition in ['To W+', 'To W-']:
-        tau, params, r_squared, x, y = fit_transition_adaptation(data_to_plot, transition)
+        tau, params, r_squared, x, y = fit_transition_adaptation(
+            data_to_plot, transition, start_fit, include_bin_minus_one)
 
         if tau is not None:
             results[transition] = {
                 'tau_bins': tau,
-                'tau_seconds': tau * 10,  # Convert bins to seconds
+                'tau_seconds': tau * 10,
                 'amplitude': params[0],
                 'asymptote': params[2],
                 'r_squared': r_squared,
@@ -234,23 +251,38 @@ def analyze_both_transitions(data_to_plot, plot=True):
             # Get all data for this transition (including negative time bins)
             data_subset = data_to_plot[data_to_plot['transition'] == transition].copy()
             data_subset = data_subset.sort_values('time_bin')
-            x_all = data_subset['time_bin'].values
+
+            # Apply appropriate shift: +0.5 for negative bins, -0.5 for positive bins
+            time_bins = data_subset['time_bin'].values
+            x_all = np.where(time_bins < 0,
+                             (time_bins + 0.5) * 10,
+                             (time_bins - 0.5) * 10)
             y_all = data_subset['lick_flag'].values
 
-            # Get positive bins (for fit)
-            x_pos = res['x']
-            y_pos = res['y']
-            params = res['params']
-
             # Plot all data points (before and after transition)
-            ax.plot(x_all * 10, y_all, 'o-', color=colors[transition],
+            ax.plot(x_all, y_all, 'o-', color=colors[transition],
                     markersize=10, linewidth=2,
                     label=f'{transition} (τ={res["tau_seconds"]:.1f}s)', zorder=3)
 
-            # Plot fitted curve (only for positive time bins)
-            x_fit = np.linspace(x_pos.min(), x_pos.max(), 100)
-            y_fit = exponential_decay(x_fit, *params)
-            ax.plot(x_fit * 10, y_fit, '--', color=colors[transition],
+            # Plot fitted curve
+            # Generate curve in transformed space (where bin -1 is at t=0, bin 1+ at their values)
+            fitted_bins = res['x']
+            fitted_bins_transformed = np.where(fitted_bins < 0, 0, fitted_bins)
+
+            # Create dense curve in transformed space
+            x_fit_transformed = np.linspace(0, fitted_bins_transformed.max(), 100)
+            y_fit = exponential_decay(x_fit_transformed, *res['params'])
+
+            # Transform back to original bin space for display
+            # t=0 -> bin -1, t=1 -> bin 1, t=2 -> bin 2, etc.
+            x_fit_bins = np.where(x_fit_transformed == 0, -1, x_fit_transformed)
+
+            # Apply display shift
+            x_fit_shifted = np.where(x_fit_bins < 0,
+                                     (x_fit_bins + 0.5) * 10,
+                                     (x_fit_bins - 0.5) * 10)
+
+            ax.plot(x_fit_shifted, y_fit, '--', color=colors[transition],
                     linewidth=2, alpha=0.7, zorder=2)
 
         # Add vertical line at transition (x=0)
@@ -261,8 +293,6 @@ def analyze_both_transitions(data_to_plot, plot=True):
         ax.set_ylabel('Lick Probability', fontsize=12)
         ax.set_ylim(0, 1.05)
         ax.set_xlim(-60, 60)
-
-        # Set x-axis ticks
         ax.set_xticks([-50, -40, -30, -20, -10, 0, 10, 20, 30, 40, 50])
 
         # Remove top and right spines
@@ -275,3 +305,28 @@ def analyze_both_transitions(data_to_plot, plot=True):
 
     return results, fig
 
+
+def subtract_baseline(df, start, stop):
+    df = df.copy()
+
+    # Create a trial identifier: increment when time resets/decreases
+    df['trial_id'] = (df['Time'].diff() < 0).cumsum()
+
+    # Calculate baseline (mean activity from start to stop) for each trial
+    baseline = df[(df['Time'] >= start) & (df['Time'] <= stop)].groupby(
+        'trial_id'
+    )['MeanDiff'].mean().reset_index()
+
+    # Rename the activity column to baseline
+    baseline.rename(columns={'MeanDiff': 'baseline'}, inplace=True)
+
+    # Merge baseline back to the original table
+    df = df.merge(baseline, on='trial_id', how='left')
+
+    # Subtract baseline from activity
+    df['MeanDiff_corr'] = df['MeanDiff'] - df['baseline']
+
+    # Drop columns before they get annoying
+    df = df.drop(['baseline', 'trial_id'], axis=1)
+
+    return df

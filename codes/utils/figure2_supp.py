@@ -322,3 +322,26 @@ def plot_figure2_supp1h_grid(data_table, saving_path, name, saving_formats):
 
             save_fig(fig, saving_path, f'{name}_{bpart}_{"W-" if context == 0 else "W+"}', formats=saving_formats)
 
+
+def figure2supp_dplick_barplots(data_table, saving_path, name, saving_formats):
+    df_sel = data_table.loc[data_table.trial_type == 'whisker_trial']
+
+    cols = ['index', 'opto_grid_ml', 'opto_grid_ap', 'data_mean_sub', 'context', 'trial_type', 'mouse_name']
+    df_sel = df_sel[cols].reset_index(drop=True)
+
+    df_sel['coord'] = '(' + df_sel['opto_grid_ap'].astype(str) + ', ' + df_sel['opto_grid_ml'].astype(str) + ')'
+
+    selected_spots = ['(-1.5, 3.5)', '(-1.5, 4.5)', '(1.5, 1.5)', '(-1.5, 0.5)', '(2.5, 2.5)', '(0.5, 4.5)']
+    data_to_plot = df_sel.loc[df_sel.coord.isin(selected_spots)]
+    data_to_plot = data_to_plot.drop(['opto_grid_ml', 'opto_grid_ap'], axis=1).reset_index(drop=True)
+
+    fig, ax = plt.subplots(1, 1, figsize=(6, 3))
+    sns.barplot(data_to_plot, x='coord', y='data_mean_sub', hue='context',
+                hue_order=['non-rewarded', 'rewarded'], palette=['darkmagenta', 'green'], legend=False, ax=ax)
+    sns.stripplot(data_to_plot, x='coord', y='data_mean_sub', hue='context', dodge=True,
+                  hue_order=['non-rewarded', 'rewarded'], palette=['darkmagenta', 'green'], legend=False, ax=ax)
+    sns.despine()
+    ax.set_xlabel('Area')
+    ax.set_ylabel('Delta P-Lick')
+    fig.tight_layout()
+    save_fig(fig, saving_path, f'{name}', formats=saving_formats)

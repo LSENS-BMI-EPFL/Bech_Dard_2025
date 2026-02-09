@@ -8,7 +8,7 @@ from codes.utils.misc.stats import compute_dprime, first_above_threshold_frame
 
 
 def plot_average_wf_timecourse(data, trial_types, saving_path, formats=['png'],
-                               scale=(-0.035, 0.035), diff_range=0.015):
+                               scale=(-0.035, 0.035), diff_range=0.010):
     rewarded_idx = np.where(['non-rewarded' not in trial for trial in trial_types])[0]
     rewarded_key = np.array(trial_types)[rewarded_idx].tolist()[0]
     non_rewarded_idx = np.where(['non-rewarded' in trial for trial in trial_types])[0]
@@ -41,12 +41,13 @@ def plot_average_wf_timecourse(data, trial_types, saving_path, formats=['png'],
             data = np.nanmean(data, axis=0)
         mice_avg_data_dict[trial_type] = data
 
-    # TIMECOURSES FOR EACH CONTEXT
+    # TIME COURSES FOR EACH CONTEXT
     for key, data in mice_avg_data_dict.items():
         plot_wf_avg(avg_data=data, output_path=saving_path, n_frames_post_stim=12, n_frames_averaged=2, key=key,
                     center_frame=10,
                     c_scale=scale, figname=f'all_mice_{key}', save_formats=formats, subdir=key)
 
+    # TIME COURSE D' FOR MAIN FIGURE
     if 'supplementary' not in saving_path:
         # TIMECOURSES D'
         rew_data = np.stack(rew_data_dict)
@@ -68,6 +69,15 @@ def plot_average_wf_timecourse(data, trial_types, saving_path, formats=['png'],
             plot_wf_single_frame(frame=filtered_first_frame, title='Figure3H_map', figure=fig, ax_to_plot=ax, suptitle=' ',
                                  saving_path=os.path.dirname(saving_path), save_formats=['png'], colormap='binary_r',
                                  vmin=0.03, vmax=0.08, cbar_shrink=0.7, separated_plots=True, nan_c='white')
+
+    # TIME COURSES CONTEXT DIFF FOR TRANSITIONS SUPP
+    if 'supplementary' in saving_path:
+        mice_avg_data_dict['context diff'] = mice_avg_data_dict[rewarded_key] - mice_avg_data_dict[non_rewarded_key]
+        plot_wf_avg(avg_data=mice_avg_data_dict['context diff'], output_path=saving_path,
+                    n_frames_post_stim=12, n_frames_averaged=2,
+                    key='context_diff', center_frame=10,
+                    halfrange=diff_range, colormap='seismic', figname='all_mice_transition_diff', save_formats=formats,
+                    subdir='difference')
 
 
 def plot_wf_timecourse_aud_wh_diff(aud_data, wh_data, aud_trials, wh_trials, saving_path, formats=['png'],

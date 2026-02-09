@@ -63,7 +63,8 @@ def plot_figure1h(data_table, saving_path, name, saving_formats):
     sns.despine()
     fig.tight_layout()
 
-    results, fit_fig = analyze_both_transitions(data_to_plot, plot=True)
+    results, fit_fig = analyze_both_transitions(data_to_plot, plot=True,
+                                                start_fit=1, include_bin_minus_one=True)
 
     save_fig(fig, saving_path, figure_name=name, formats=saving_formats)
     save_fig(fit_fig, saving_path, figure_name=f'{name}_fit', formats=saving_formats)
