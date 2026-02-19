@@ -78,7 +78,7 @@ if not os.path.exists(result_folder):
 figure3_supp.wh_psth_by_trial_index(df, sorted_areas, save_folder=result_folder,
                                     name='wh_over_block', formats=['png', 'svg'], pre_stim=5)
 
-# # Difference between W+ auditory hits and whisker hits
+# Difference between W+ auditory hits and whisker hits
 aud_data_path = os.path.join(main_dir, 'data', 'figure3', '3E_images')
 aud_data_dict = np.load(os.path.join(aud_data_path, 'general_data_dict.npy'), allow_pickle=True).item()
 
@@ -92,4 +92,29 @@ if not os.path.exists(result_folder):
 figure3_supp.wf_timecourse_auditory_to_whisker(aud_data=aud_data_dict,
                                                whisker_data=wh_data_dict,
                                                saving_path=result_folder)
+
+# DLC trial PSTHs
+dset_list = ['dlc_jrgeco', 'dlc_gcamp', 'controls_tdtomato', 'controls_gfp']
+# dset : dlc_jrgeco, dlc_gcamp, controls_tdtomato, controls_gfp
+fig_name = 'psths_' + '_'.join(dset_list)
+side_dlc_list = []
+top_dlc_list = []
+data_path = os.path.join(main_dir, 'data', 'figure3_supp', 'Reviewing')
+for dset in dset_list:
+    sub_data_path = os.path.join(data_path, dset)
+    side_dlc = pd.read_csv(os.path.join(sub_data_path, 'side_dlc_results.csv'))
+    top_dlc = pd.read_csv(os.path.join(sub_data_path, 'top_dlc_results.csv'))
+    side_dlc = side_dlc.drop('Unnamed: 0', axis=1)
+    top_dlc = top_dlc.drop('Unnamed: 0', axis=1)
+    side_dlc_list.append(side_dlc)
+    top_dlc_list.append(top_dlc)
+
+full_side_dlc = pd.concat(side_dlc_list)
+full_top_dlc = pd.concat(top_dlc_list)
+result_folder = os.path.join(fig_folder, 'Reviewing', 'DLC_analysis')
+if not os.path.exists(result_folder):
+    os.makedirs(result_folder)
+figure3_supp.dlc_psths(full_side_dlc, full_top_dlc, save_folder=result_folder,
+                       name=fig_name,
+                       formats=['png', 'svg'])
 

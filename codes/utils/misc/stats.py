@@ -306,27 +306,53 @@ def analyze_both_transitions(data_to_plot, plot=True, start_fit=1, include_bin_m
     return results, fig
 
 
-def subtract_baseline(df, start, stop):
-    df = df.copy()
+def compute_dprime_over_time(df, group_cols, value_cols, context_col='context'):
+    """
+    Compute d-prime over time between two contexts for specified value columns.
 
-    # Create a trial identifier: increment when time resets/decreases
-    df['trial_id'] = (df['Time'].diff() < 0).cumsum()
+    Parameters:
+    -----------
+    df : pd.DataFrame
+        Input dataframe with mouse-level data
+    group_cols : list
+        Columns to group by (should include 'time' and context_col)
+    value_cols : list
+        Columns to compute d-prime for
+    context_col : str
+        Name of the context column (default: 'context')
 
-    # Calculate baseline (mean activity from start to stop) for each trial
-    baseline = df[(df['Time'] >= start) & (df['Time'] <= stop)].groupby(
-        'trial_id'
-    )['MeanDiff'].mean().reset_index()
+    Returns:
+    --------
+    pd.DataFrame
+        DataFrame with time and d-prime values for each value column
+    """
+    # Calculate means across mice
+    df_avg = df.drop(['mouse_id'], axis=1, errors='ignore').groupby(
+        group_cols, as_index=False
+    ).agg('mean')
 
-    # Rename the activity column to baseline
-    baseline.rename(columns={'MeanDiff': 'baseline'}, inplace=True)
+    # Calculate absolute difference between contexts
+    delta_mean = df_avg.groupby('time')[value_cols].diff().abs()
+    delta_mean['time'] = df_avg['time']
+    delta_mean = delta_mean.dropna().reset_index(drop=True)
 
-    # Merge baseline back to the original table
-    df = df.merge(baseline, on='trial_id', how='left')
+    # Get standard deviations
+    df_std = df.drop(['mouse_id'], axis=1, errors='ignore').groupby(
+        group_cols, as_index=False
+    ).agg('std')
 
-    # Subtract baseline from activity
-    df['MeanDiff_corr'] = df['MeanDiff'] - df['baseline']
+    # Pooled std = sqrt(mean of variances across contexts)
+    pooled_std = df_std.groupby('time')[value_cols].apply(
+        lambda x: np.sqrt((x ** 2).mean())
+    ).reset_index()
 
-    # Drop columns before they get annoying
-    df = df.drop(['baseline', 'trial_id'], axis=1)
+    # Calculate d'
+    dprime_df = delta_mean.merge(pooled_std, on='time', suffixes=('_delta', '_std'))
 
-    return df
+    # Create d-prime columns
+    result = {'time': dprime_df['time']}
+    for col in value_cols:
+        result[f'dprime_{col}'] = dprime_df[f'{col}_delta'] / dprime_df[f'{col}_std']
+
+    return pd.DataFrame(result)
+

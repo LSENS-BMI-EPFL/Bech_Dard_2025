@@ -8,7 +8,7 @@ import numpy as np
 
 from codes.utils.misc.plot_average_widefield_timecourse import plot_average_wf_timecourse, \
     plot_wf_timecourse_aud_wh_diff
-from codes.utils.misc.stats import psth_context_stats
+from codes.utils.misc.stats import psth_context_stats, compute_dprime_over_time
 from codes.utils.misc.fig_saving import save_fig
 
 
@@ -420,7 +420,7 @@ def wh_psth_by_trial_index(df, sorted_areas, save_folder, name, formats, pre_sti
 
 
 def wf_timecourse_auditory_to_whisker(aud_data, whisker_data, saving_path, formats=['png'],
-                                      halfrange=0.03):
+                                      halfrange=0.025):
     # Keep only correct trial types in W+ context:
     wh_trial_types = ['rewarded_whisker_hit_trial']
     aud_trial_types = ['rewarded_auditory_hit_trial']
@@ -430,4 +430,191 @@ def wf_timecourse_auditory_to_whisker(aud_data, whisker_data, saving_path, forma
                                    saving_path, formats=formats,
                                    diff_range=halfrange)
 
+
+def dlc_psths(side_dlc, top_dlc, save_folder, name, formats=['png']):
+    # JAW
+    jaw_trace = 'jaw_y'  # could be 'jaw_angle'
+    cols = [jaw_trace, 'time', 'mouse_id', 'session_id', 'context', 'trial_type', 'correct_choice']
+    # Filter columns
+    jaw_df = side_dlc[cols].copy(deep=True).reset_index(drop=True)
+    # Keep only correct trial in relevant time window
+    jaw_df = jaw_df.loc[(jaw_df.correct_choice == 1)
+                        & (jaw_df.time >= -0.1)
+                        & (jaw_df.time <= 0.2)].reset_index(drop=True)
+    # Add trial id column
+    jaw_df['trial_id'] = (jaw_df['time'].diff() < 0).cumsum()
+    # Add baseline column
+    jaw_df['baseline'] = jaw_df.groupby('trial_id')[jaw_trace].transform(
+        lambda x: x[jaw_df.loc[x.index, 'time'] < 0].mean()
+    )
+    # Baseline subtraction to the data
+    jaw_df[jaw_trace] = jaw_df[jaw_trace] - jaw_df['baseline']
+    # Average within session
+    jaw_df_avg = jaw_df.groupby(['time', 'mouse_id', 'session_id', 'context', 'trial_type', 'correct_choice'],
+                                as_index=False).agg('mean')
+    # Average within mouse
+    mouse_jaw_df = jaw_df_avg.drop('session_id', axis=1).groupby(['time', 'mouse_id', 'context',
+                                                                  'trial_type', 'correct_choice'],
+                                                                 as_index=False).agg('mean')
+    print(f"{len(mouse_jaw_df.mouse_id.unique())} mice for jaw trace")
+
+    # WHISKERS
+    cols = ['whisker_angle', 'time', 'mouse_id', 'session_id', 'context', 'trial_type',
+            'correct_choice']
+    # Filter columns
+    whisker_df = top_dlc[cols].copy(deep=True).reset_index(drop=True)
+    # Keep only correct trial in relevant time window
+    whisker_df = whisker_df.loc[(whisker_df.correct_choice == 1)
+                                & (whisker_df.time >= -0.1)
+                                & (whisker_df.time <= 0.2)].reset_index(drop=True)
+    dt = np.median(1 / np.diff(whisker_df.time.unique()))
+    # Add trial id column
+    whisker_df['trial_id'] = (whisker_df['time'].diff() < 0).cumsum()
+    # Add baseline column
+    whisker_df['baseline'] = whisker_df.groupby('trial_id')['whisker_angle'].transform(
+        lambda x: x[whisker_df.loc[x.index, 'time'] < 0].mean()
+    )
+    # Baseline subtraction to the data
+    whisker_df['whisker_angle'] = whisker_df['whisker_angle'] - whisker_df['baseline']
+    # Whisker velocity:
+    whisker_df['whisker_velocity'] = np.zeros_like(whisker_df['whisker_angle'])
+    whisker_df.loc[1:, 'whisker_velocity'] = np.diff(whisker_df['whisker_angle'])
+    whisker_df['whisker_speed'] = np.abs(whisker_df['whisker_velocity']) * dt
+
+    # Average within session
+    whisker_df_avg = whisker_df.groupby(['time', 'mouse_id', 'session_id', 'context', 'trial_type', 'correct_choice'],
+                                        as_index=False).agg('mean')
+    # Average within mouse
+    mouse_whisker_df = whisker_df_avg.drop('session_id', axis=1).groupby(['time', 'mouse_id', 'context',
+                                                                          'trial_type', 'correct_choice'],
+                                                                         as_index=False).agg('mean')
+    print(f"{len(mouse_jaw_df.mouse_id.unique())} mice for whisker trace")
+
+    # Get trial type
+    whttype = [ttype for ttype in mouse_jaw_df.trial_type.unique() if 'whisker' in ttype]
+    audttype = [ttype for ttype in mouse_jaw_df.trial_type.unique() if 'auditory' in ttype]
+
+    # Colors
+    context_palette = ['darkmagenta', 'green']
+
+    # FIGURE : STIM ALIGNED PSTHs
+    fig, axes = plt.subplots(2, 3, figsize=(9, 6), sharex=True)
+    # Jaw Y
+    sns.lineplot(mouse_jaw_df.loc[mouse_jaw_df.trial_type.isin(whttype)], x='time', y=jaw_trace, hue='context',
+                 hue_order=['non-rewarded', 'rewarded'], palette=context_palette, legend=False, ax=axes[0, 0])
+    sns.lineplot(mouse_jaw_df.loc[mouse_jaw_df.trial_type.isin(audttype)], x='time', y=jaw_trace, hue='context',
+                 hue_order=['non-rewarded', 'rewarded'], palette=context_palette, legend=False, ax=axes[1, 0])
+
+    # Whisker angle
+    sns.lineplot(mouse_whisker_df.loc[mouse_whisker_df.trial_type.isin(whttype)], x='time', y='whisker_angle',
+                 hue='context', hue_order=['non-rewarded', 'rewarded'], palette=context_palette, legend=False,
+                 ax=axes[0, 1])
+    sns.lineplot(mouse_whisker_df.loc[mouse_whisker_df.trial_type.isin(audttype)], x='time', y='whisker_angle',
+                 hue='context', hue_order=['non-rewarded', 'rewarded'], palette=context_palette, legend=False,
+                 ax=axes[1, 1])
+
+    # Whisker speed
+    sns.lineplot(mouse_whisker_df.loc[(mouse_whisker_df.trial_type.isin(whttype))
+                                      & (mouse_whisker_df.time > -0.1)],
+                 x='time', y='whisker_speed', hue='context', hue_order=['non-rewarded', 'rewarded'],
+                 palette=context_palette, legend=False, ax=axes[0, 2])
+    sns.lineplot(mouse_whisker_df.loc[(mouse_whisker_df.trial_type.isin(audttype))
+                                      & (mouse_whisker_df.time > -0.1)],
+                 x='time', y='whisker_speed', hue='context', hue_order=['non-rewarded', 'rewarded'],
+                 palette=context_palette, legend=False, ax=axes[1, 2])
+
+    sns.despine()
+    for ax in axes[0, :].flatten():
+        ax.axvline(x=0, ymin=0, ymax=1, linestyle='-', c='orange')
+    for ax in axes[1, :].flatten():
+        ax.axvline(x=0, ymin=0, ymax=1, linestyle='-', c='blue')
+    for ax in axes[:, 0].flatten():
+        ax.set_ylabel('(mm)')
+    for ax in axes[:, 1].flatten():
+        ax.set_ylabel('(deg)')
+        ax.set_ylim(-4, 12)
+    for ax in axes[:, 2].flatten():
+        ax.set_ylabel('(deg / sec)')
+        ax.set_ylim(0, 800)
+    axes[0, 0].set_title('Jaw opening')
+    axes[0, 1].set_title('Whisker angle')
+    axes[0, 2].set_title('Whisker speed')
+
+    fig.tight_layout()
+
+    save_fig(fig, saving_path=save_folder, figure_name=f'{name}', formats=formats)
+
+    # D-prime for WHISKER trials - whisker angle and speed
+    dprime_whisker = compute_dprime_over_time(
+        df=mouse_whisker_df.loc[mouse_whisker_df.trial_type.isin(whttype)],
+        group_cols=['time', 'context', 'trial_type', 'correct_choice'],
+        value_cols=['whisker_angle', 'whisker_speed']
+    )
+
+    # D-prime for AUDITORY trials - whisker angle and speed
+    dprime_auditory_whisker = compute_dprime_over_time(
+        df=mouse_whisker_df.loc[mouse_whisker_df.trial_type.isin(audttype)],
+        group_cols=['time', 'context', 'trial_type', 'correct_choice'],
+        value_cols=['whisker_angle', 'whisker_speed']
+    )
+
+    # D-prime for WHISKER trials - jaw opening
+    dprime_whisker_jaw = compute_dprime_over_time(
+        df=mouse_jaw_df.loc[mouse_jaw_df.trial_type.isin(whttype)],
+        group_cols=['time', 'context', 'trial_type', 'correct_choice'],
+        value_cols=[jaw_trace]
+    )
+
+    # D-prime for AUDITORY trials - jaw opening
+    dprime_auditory_jaw = compute_dprime_over_time(
+        df=mouse_jaw_df.loc[mouse_jaw_df.trial_type.isin(audttype)],
+        group_cols=['time', 'context', 'trial_type', 'correct_choice'],
+        value_cols=[jaw_trace]
+    )
+
+    # FIGURE : d-primes
+    fig, axes = plt.subplots(2, 3, figsize=(9, 5), sharex=True)
+
+    # Row 0: Whisker trials
+    axes[0, 0].plot(dprime_whisker_jaw['time'], dprime_whisker_jaw[f'dprime_{jaw_trace}'])
+    axes[0, 0].set_ylabel(f"D' {jaw_trace}")
+    axes[0, 0].set_title('Jaw opening')
+    axes[0, 0].axvline(x=0, color='orange', linestyle='-')
+
+    axes[0, 1].plot(dprime_whisker['time'], dprime_whisker['dprime_whisker_angle'])
+    axes[0, 1].set_ylabel("D' whisker angle")
+    axes[0, 1].set_title('Whisker angle')
+    axes[0, 1].axvline(x=0, color='orange', linestyle='-')
+
+    axes[0, 2].plot(dprime_whisker['time'], dprime_whisker['dprime_whisker_speed'])
+    axes[0, 2].set_ylabel("D' whisker speed")
+    axes[0, 2].set_title('Whisker speed')
+    axes[0, 2].axvline(x=0, color='orange', linestyle='-')
+
+    # Row 1: Auditory trials
+    axes[1, 0].plot(dprime_auditory_jaw['time'], dprime_auditory_jaw[f'dprime_{jaw_trace}'])
+    axes[1, 0].set_ylabel(f"D' {jaw_trace}")
+    axes[1, 0].set_xlabel('Time (s)')
+    axes[1, 0].axvline(x=0, color='blue', linestyle='-')
+
+    axes[1, 1].plot(dprime_auditory_whisker['time'], dprime_auditory_whisker['dprime_whisker_angle'])
+    axes[1, 1].set_ylabel("D' whisker angle")
+    axes[1, 1].set_xlabel('Time (s)')
+    axes[1, 1].axvline(x=0, color='blue', linestyle='-')
+
+    axes[1, 2].plot(dprime_auditory_whisker['time'], dprime_auditory_whisker['dprime_whisker_speed'])
+    axes[1, 2].set_ylabel("D' whisker speed")
+    axes[1, 2].set_xlabel('Time (s)')
+    axes[1, 2].axvline(x=0, color='blue', linestyle='-')
+
+    sns.despine()
+
+    for ax in axes.flatten():
+        ax.axhline(y=0, color='k', linestyle='--', alpha=0.3)
+        ax.axhline(y=1, color='r', linestyle='--', alpha=0.3)
+        ax.set_ylim(-1, 5)
+
+    fig.tight_layout()
+
+    save_fig(fig, saving_path=save_folder, figure_name=f'{name}_dprime', formats=formats)
 
