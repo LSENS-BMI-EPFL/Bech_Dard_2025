@@ -63,12 +63,12 @@ def figure3f_psth(table, saving_path, name, formats=['png']):
 
     save_fig(fig, saving_path=saving_path, figure_name=name, formats=formats)
 
-    # Plot Dprime and Mean diff for supplementary
-    saving_folder = os.path.join(os.path.dirname(saving_path), 'supplementary', 'figure3_supp1', 'Reviewing')
+    # SUPPLEMENTARY : Plot Dprime and Mean diff for supplementary
+    saving_folder = os.path.join(os.path.dirname(saving_path), 'supplementary', 'figure3_supp3')
     if not os.path.exists(saving_folder):
         os.makedirs(saving_folder)
 
-    # Fig 1 (Mean diff):
+    # Figure3 - figure supplement 3C left (Mean diff):
     fig, ax = plt.subplots(1, 1, figsize=(4, 4))
     c_palette = ['orange', 'darkorange', 'royalblue', 'blue', 'purple', 'red']
     sns.lineplot(stat_results, x='Time', y='MeanDiff', hue='Spot', hue_order=selected_spots,
@@ -81,9 +81,9 @@ def figure3f_psth(table, saving_path, name, formats=['png']):
     ax.set_ylim(-0.01, 0.035)
     sns.despine()
     fig.tight_layout()
-    save_fig(fig, saving_path=saving_folder, figure_name=f'{name}_supp_3_delta_gran_avg', formats=formats)
+    save_fig(fig, saving_path=saving_folder, figure_name=f'Figure3_supp3C_left', formats=formats)
 
-    # Fig 2 (D prime):
+    # Figure3 - figure supplement 3C right (D prime):
     fig, ax = plt.subplots(1, 1, figsize=(4, 4))
     sns.lineplot(stat_results, x='Time', y='Dprime', hue='Spot', hue_order=selected_spots,
                  palette=c_palette, legend=True, ax=ax)
@@ -96,5 +96,5 @@ def figure3f_psth(table, saving_path, name, formats=['png']):
     ax.set_ylim(-2, 5)
     sns.despine()
     fig.tight_layout()
-    save_fig(fig, saving_path=saving_folder, figure_name=f'{name}_supp_3_dprime', formats=formats)
+    save_fig(fig, saving_path=saving_folder, figure_name=f'Figure3_supp3C_right', formats=formats)
 

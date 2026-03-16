@@ -250,6 +250,8 @@ def dprime_criterion(data_table, saving_path, name, saving_formats):
                   legend=False, dodge=True, ax=ax1)
     ax0.set_ylabel("Whisker D'")
     ax0.set_xlabel('Context')
+    ax0.set_title("d'")
+    ax1.set_title('Criterion')
     ax1.set_ylabel("Whisker Criterion")
     ax1.set_xlabel('Context')
     sns.despine()

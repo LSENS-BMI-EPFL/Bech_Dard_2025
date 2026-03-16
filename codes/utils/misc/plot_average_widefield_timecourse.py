@@ -71,7 +71,7 @@ def plot_average_wf_timecourse(data, trial_types, saving_path, formats=['png'],
                                  vmin=0.03, vmax=0.08, cbar_shrink=0.7, separated_plots=True, nan_c='white')
 
     # TIME COURSES CONTEXT DIFF FOR TRANSITIONS SUPP
-    if 'supplementary' in saving_path:
+    if ('supplementary' in saving_path) and (('figure3_supp2' in saving_path) or ('figure3_supp5' in saving_path)):
         mice_avg_data_dict['context diff'] = mice_avg_data_dict[rewarded_key] - mice_avg_data_dict[non_rewarded_key]
         plot_wf_avg(avg_data=mice_avg_data_dict['context diff'], output_path=saving_path,
                     n_frames_post_stim=12, n_frames_averaged=2,
@@ -140,7 +140,7 @@ def plot_wf_timecourse_aud_wh_diff(aud_data, wh_data, aud_trials, wh_trials, sav
         'rewarded_auditory_hit_trial']
 
     plot_wf_avg(avg_data=data_to_plot, output_path=saving_path, n_frames_post_stim=12, n_frames_averaged=2,
-                key='Reviewing', center_frame=10, halfrange=diff_range, colormap='seismic',
+                key='diff', center_frame=10, halfrange=diff_range, colormap='seismic',
                 figname=f'all_mice_whisker_auditory_diff',
                 save_formats=formats, subdir='difference')
 

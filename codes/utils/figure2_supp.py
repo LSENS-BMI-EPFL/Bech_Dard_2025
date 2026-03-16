@@ -10,7 +10,7 @@ from codes.utils.misc.fig_saving import save_fig
 from codes.utils.misc.plot_utils import *
 
 
-def plot_figure2_supp1cd(data_table, saving_path, saving_formats):
+def plot_figure2_supp1de(data_table, saving_path, saving_formats):
     data_table['shuffle_dist_sub'] = data_table['shuffle_dist_sub'].apply(json.loads)
 
     avg_df = data_table.groupby(by=['context', 'trial_type', 'opto_grid_ml', 'opto_grid_ap']).agg(
@@ -75,14 +75,14 @@ def plot_figure2_supp1cd(data_table, saving_path, saving_formats):
         for a, row in zip(axes[:, 0], rows):
             a.set_ylabel(row)
 
-    names = ['Figure2_supp1C', 'Figure2_supp1D']
+    names = ['Figure2_supp1D', 'Figure2_supp1E']
     for idx, panel in enumerate([fig, fig1]):
         save_fig(panel, saving_path, names[idx], formats=saving_formats)
 
     plt.close('all')
 
 
-def plot_figure2_supp1efg(muscimol, ringer, saving_path, sites, names, saving_formats):
+def plot_figure2_supp2abc(muscimol, ringer, saving_path, sites, names, saving_formats):
     for idx, site in enumerate(sites):
         muscimol_path = os.path.join(muscimol, f'{site}_Average mice behavior', 'context_days_full_table.csv')
         ringer_path = os.path.join(ringer, f'{site}_general_average_across_days.csv')
@@ -158,10 +158,11 @@ def plot_figure2_supp1efg(muscimol, ringer, saving_path, sites, names, saving_fo
         save_fig(figure, saving_path, f'Figure2_supp1{names[idx]}_right', formats=saving_formats)
 
 
-def plot_figure2_supp1h_tc(data_table, saving_path, name, saving_formats):
+def plot_figure2_supp3a(data_table, saving_path, name, saving_formats):
     data_table = data_table.loc[data_table.trial_type == 'whisker_trial']
 
-    selected_spots = ['(-1.5, 3.5)', '(-1.5, 4.5)', '(1.5, 1.5)', '(-1.5, 0.5)', '(2.5, 2.5)', '(0.5, 4.5)']
+    selected_spots = ['(-1.5, 3.5)', '(-1.5, 4.5)', '(1.5, 1.5)', '(-1.5, 0.5)',
+                      '(2.5, 2.5)', '(0.5, 4.5)']
     contexts = [1, 0]
     bodyparts = ['jaw_y']
     combinations = list(itertools.product(contexts, bodyparts, selected_spots))
@@ -209,7 +210,7 @@ def plot_figure2_supp1h_tc(data_table, saving_path, name, saving_formats):
     save_fig(fig, saving_path, name, formats=saving_formats)
 
 
-def plot_figure2_supp1h_auc(data_table, saving_path, name, saving_formats):
+def plot_figure2_supp3b(data_table, saving_path, name, saving_formats):
     data_table = data_table.loc[data_table.trial_type == 'whisker_trial']
 
     selected_spots = ['(-5.0, 5.0)', '(-1.5, 3.5)', '(-1.5, 4.5)', '(1.5, 1.5)', '(-1.5, 0.5)', '(2.5, 2.5)',
@@ -281,7 +282,7 @@ def plot_figure2_supp1h_auc(data_table, saving_path, name, saving_formats):
                 os.path.join(saving_path, f'{name}_{bpart}_{"W-" if context == 0 else "W+"}_stat_results.csv'))
 
 
-def plot_figure2_supp1h_grid(data_table, saving_path, name, saving_formats):
+def plot_figure2_supp3c(data_table, saving_path, name, saving_formats):
     data_table = data_table.loc[data_table.trial_type == 'whisker_trial']
 
     bodyparts_to_plot = ['jaw_y']

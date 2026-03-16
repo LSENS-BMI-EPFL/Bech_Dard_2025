@@ -1,4 +1,3 @@
-import os
 import ast
 import numpy as np
 import pandas as pd
@@ -94,6 +93,7 @@ def figure3g(auditory_df, whisker_df, saving_path, name, formats=['png', 'svg'])
     for ax in axes.flatten():
         ax.set_xlabel('Auditory')
         ax.set_ylabel('Whisker')
+    axes[1].legend(bbox_to_anchor=(1.05, 1), loc='upper left', fontsize=7)
     fig.tight_layout()
 
     save_fig(fig, saving_path=saving_path, figure_name=f'{name}_context', formats=formats)
@@ -123,6 +123,7 @@ def figure3g(auditory_df, whisker_df, saving_path, name, formats=['png', 'svg'])
         axes.flatten()[idx].set_yticks(np.arange(0, 0.06, 1 / 100))
         axes.flatten()[idx].set_xticks(np.arange(0, 0.06, 1 / 100))
         ax.spines[['top', 'right']].set_visible(False)
+    axes[1].legend(bbox_to_anchor=(1.05, 1), loc='upper left', fontsize=7)
     fig.tight_layout()
 
     save_fig(fig, saving_path=saving_path, figure_name=f'{name}_trials', formats=formats)

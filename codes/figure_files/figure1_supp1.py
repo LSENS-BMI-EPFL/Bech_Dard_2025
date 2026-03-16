@@ -30,26 +30,26 @@ df = pd.read_csv(os.path.join(table_path, 'context_block_duration_expert.csv'), 
 figure1_supp.plot_figure1_supp1c(data_table=df, saving_path=fig_folder, name='Figure1_supp1C',
                                  saving_formats=['png', 'svg'])
 
+
 # 1D
 # LOAD DATA :
-table_path = os.path.join(main_dir, 'data', 'figure1_supp', '1D')
-df = pd.read_csv(os.path.join(table_path, 'mouse_averaged_reaction_time.csv'), index_col=0)
-figure1_supp.plot_figure1_supp1e(data_table=df, saving_path=fig_folder, name='Figure1_supp1D',
-                                 saving_formats=['png', 'svg'])
+table_path = os.path.join(main_dir, 'data', 'figure1', '1B')
+df = pd.read_csv(os.path.join(table_path, 'concatenated_bhv_tables.csv'), index_col=0)
+figure1_supp.dprime_criterion(data_table=df, saving_path=fig_folder,
+                              name='Figure1_supp1D', saving_formats=['png', 'svg'])
 
 # 1E
 # LOAD DATA :
 table_path = os.path.join(main_dir, 'data', 'figure1_supp', '1E')
-df = pd.read_csv(os.path.join(table_path, 'context_transitions_averaged_table.csv'), index_col=0)
-figure1_supp.plot_figure1_supp1d(data_table=df, saving_path=fig_folder, name='Figure1_supp1E',
+df = pd.read_csv(os.path.join(table_path, 'mouse_averaged_reaction_time.csv'), index_col=0)
+figure1_supp.plot_figure1_supp1e(data_table=df, saving_path=fig_folder, name='Figure1_supp1E',
                                  saving_formats=['png', 'svg'])
 
-# D' and criterion
+# 1F
 # LOAD DATA :
-table_path = os.path.join(main_dir, 'data', 'figure1', '1B')
-df = pd.read_csv(os.path.join(table_path, 'concatenated_bhv_tables.csv'), index_col=0)
-result_folder = os.path.join(fig_folder, 'Reviewing')
-if not os.path.exists(result_folder):
-    os.makedirs(result_folder)
-figure1_supp.dprime_criterion(data_table=df, saving_path=result_folder,
-                              name='whisker_dprime', saving_formats=['png', 'svg'])
+table_path = os.path.join(main_dir, 'data', 'figure1_supp', '1F')
+df = pd.read_csv(os.path.join(table_path, 'context_transitions_averaged_table.csv'), index_col=0)
+figure1_supp.plot_figure1_supp1d(data_table=df, saving_path=fig_folder, name='Figure1_supp1F',
+                                 saving_formats=['png', 'svg'])
+
+

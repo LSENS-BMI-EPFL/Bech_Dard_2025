@@ -356,3 +356,8 @@ def compute_dprime_over_time(df, group_cols, value_cols, context_col='context'):
 
     return pd.DataFrame(result)
 
+
+def bootstrap_ci95(x, n_boot=1000):
+    bootstrapped_means = [np.mean(np.random.choice(x, size=len(x), replace=True)) for _ in range(n_boot)]
+    return np.percentile(bootstrapped_means, 97.5) - np.percentile(bootstrapped_means, 2.5)
+
