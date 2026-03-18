@@ -258,3 +258,30 @@ def dprime_criterion(data_table, saving_path, name, saving_formats):
     fig.tight_layout()
 
     save_fig(fig, saving_path, figure_name=name, formats=saving_formats)
+
+
+def plot_example_traces(dlc_data, trial_table, saving_path, name, saving_formats=['png', 'svg']):
+    trial_table['context'] = trial_table['context'].map({0: 'non-rewarded', 1: 'rewarded'})
+
+    time = (75, 115)
+
+    g = sns.FacetGrid(dlc_data.loc[(dlc_data.time >= time[0]) & (dlc_data.time < time[1])].melt(id_vars='time',
+                                                                                                value_vars=[
+                                                                                                    'whisker_angle',
+                                                                                                    'jaw_y',
+                                                                                                    'pupil_area'],
+                                                                                                var_name='part',
+                                                                                                value_name='movement'),
+                      row='part', sharey=False, height=1, aspect=9)
+    g.map_dataframe(sns.lineplot, x='time', y='movement', color='k', linewidth=1)
+
+    for ax in g.axes:
+        trials = trial_table.loc[
+            (trial_table.start_time >= time[0]) & (trial_table.start_time < time[1]), ['start_time', 'trial_type']]
+        trials['color'] = trials.trial_type.map(
+            {'no_stim_trial': 'gray', 'whisker_trial': 'orange', 'auditory_trial': 'blue'})
+        for i, trial in trials.iterrows():
+            ax[0].axvline(trial.start_time, c=trial.color, linestyle='--', linewidth=1)
+
+    save_fig(g, saving_path, figure_name=name, formats=saving_formats)
+
