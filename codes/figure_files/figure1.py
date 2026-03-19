@@ -11,8 +11,8 @@ fig_supp_folder = os.path.join(main_dir, 'figures', 'supplementary')
 if not os.path.exists(fig_folder):
     os.makedirs(fig_folder)
 
-1B
-LOAD DATA :
+# 1B
+# LOAD DATA :
 table_path = os.path.join(main_dir, 'data', 'figure1', '1B')
 df = pd.read_csv(os.path.join(table_path, 'concatenated_bhv_tables.csv'), index_col=0)
 figure1B.plot_figure1b(data_table=df, saving_path=fig_folder, name='Figure1B', saving_formats=['png', 'svg'])
