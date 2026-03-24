@@ -1,6 +1,7 @@
 import os
+from pathlib import Path
 import pandas as pd
-from codes.utils import figure1B, figure1C, figure1D, figure1E, figure1FG, figure1H, figure1IJ
+from codes.utils import figure1B, figure1C, figure1D, figure1E, figure1FG, figure1H, figure1IJ, figure1KL
 
 # Get main data and saving dir
 main_dir = os.path.abspath(os.path.join(os.getcwd(), "..", ".."))
@@ -70,4 +71,11 @@ figure1IJ.plot_baseline_differences(side_dlc_data=full_side_dlc,
                                     supp_save_path=fig_supp_folder,
                                     figname='Figure1',
                                     fig_formats=['png', 'svg'])
+
+# 1K
+data_path = os.path.join(main_dir, 'data', 'figure1', '1KL')
+figure1KL.plot_figure1k(load_dir=data_path, saving_path=fig_folder, name='Figure1K', saving_formats=['png', 'svg'])
+
+# 1L
+figure1KL.plot_figure1l(load_dir=data_path, saving_path=fig_folder, name='Figure1L', saving_formats=['png', 'svg'])
 
