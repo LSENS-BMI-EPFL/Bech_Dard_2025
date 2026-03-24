@@ -613,7 +613,7 @@ def plot_figure1l(load_dir: Path, saving_path: Path, name: str = 'Figure1L', sav
         raise NotImplementedError
 
     handles = [plt.scatter([], [], c=color, label=label)
-               for label, color in zip(['to R-', 'to R+'], custom_palette.values())]
+               for label, color in zip(['to W-', 'to W+'], custom_palette.values())]
     ax.legend(handles=handles)
     ax.set_xlabel(feature_a)
     ax.set_ylabel(f'SHAP value of \n{feature_a.lower()}')
