@@ -1,5 +1,7 @@
-# Bech_Dard_2025
-Codes to reproduce figures from processed data for Bech and Dard 2025. 
+# **Bech & Dard Figure panels reproduction**
+This repository allows the reproduction of figure panels in Bech, Dard et al. (2026), starting from intermediate dataset.
+
+Intermediate dataset can be downloaded from [zenodo](zenodo) or generated starting from NWB files using [process NWB](https://github.com/LSENS-BMI-EPFL/Bech_Dard_process_NWB).
 
 Step 1: Install the conda environment
 
@@ -15,6 +17,6 @@ Step 2: Clone the repo or download source code
 
 Step 3: Download the processed data folder 
 
-Step 4: Placed the processed data folder into the 'Bech_Dard_2025' folder
+Step 4: Placed the processed data folder into the 'Bech_Dard_plot_figures' folder
 
 Step 5: Run the figure files, it produces a 'figures' folder containing panels from the figures
