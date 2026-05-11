@@ -22,7 +22,7 @@ figure2_supp.figure2supp_dplick_barplots(data_table=df, saving_path=result_folde
 
 # 1DE
 # LOAD DATA :
-table_path = os.path.join(main_dir, 'data', 'figure2_supp', '1CD')
+table_path = os.path.join(main_dir, 'data', 'figure2_supp', '1DE')
 df = pd.read_csv(os.path.join(table_path, 'optogrid_data_table_controls.csv'), index_col=0)
 figure2_supp.plot_figure2_supp1de(data_table=df, saving_path=fig_folder, saving_formats=['png'])
 
