@@ -345,7 +345,7 @@ def plot_reduced_correlations(df, roi, save_path):
     fig.savefig(os.path.join(save_path, 'red_im', f'{roi}_significant_pairs.png'))
 
 
-def plot_mouse_barplot_r_context(data, output_path):
+def Figure4_supp1_B_C(data, output_path):
 
     stim_list = ['(-5.0, 5.0)']
     save_path = os.path.join(output_path)
@@ -448,8 +448,8 @@ def plot_mouse_barplot_r_context(data, output_path):
             for label in ax.get_xticklabels():
                 label.set_horizontalalignment('right')
         g.figure.tight_layout()                
-        g.figure.savefig(os.path.join(save_path, 'r-shuffle_R+-R-_barplot_selected_rois_seed_dest_avg_correct.png'))
-        g.figure.savefig(os.path.join(save_path, 'r-shuffle_R+-R-_barplot_selected_rois_seed_dest_avg_correct.svg'))
+        g.figure.savefig(os.path.join(save_path, 'Figure4_supp1_B_correct.png'))
+        g.figure.savefig(os.path.join(save_path, 'Figure4_supp1_B_correct.svg'))
 
         ## Plot corrected correlation r substracted R+ - R-  with incorrect trials
 
@@ -481,8 +481,8 @@ def plot_mouse_barplot_r_context(data, output_path):
             for label in ax.get_xticklabels():
                 label.set_horizontalalignment('right')
         g.figure.tight_layout()
-        g.figure.savefig(os.path.join(save_path, 'r-shuffle_R+-R-_barplot_selected_rois_seed_dest_avg_incorrect.png'))
-        g.figure.savefig(os.path.join(save_path, 'r-shuffle_R+-R-_barplot_selected_rois_seed_dest_avg_incorrect.svg'))
+        g.figure.savefig(os.path.join(save_path, 'Figure4_supp1_B_incorrect.png'))
+        g.figure.savefig(os.path.join(save_path, 'Figure4_supp1_B_incorrect.svg'))
 
         ## compute         
         total_avg = data.groupby(by=['opto_stim_coord', 'context', 'correct_trial', 'variable'])['value'].apply(
@@ -601,12 +601,12 @@ def plot_mouse_barplot_r_context(data, output_path):
                             fontweight="bold"
                         )
 
-            g.figure.savefig(os.path.join(save_path, f'{"correct" if outcome==1 else "incorrect"}_connected_pairs_seed_dest_avg_barplot.png'))
-            g.figure.savefig(os.path.join(save_path, f'{"correct" if outcome==1 else "incorrect"}_connected_pairs_seed_dest_avg_barplot.svg'))
+            g.figure.savefig(os.path.join(save_path, f'Figure4_supp1_C_{"correct" if outcome==1 else "incorrect"}.png'))
+            g.figure.savefig(os.path.join(save_path, f'Figure4_supp1_C_{"correct" if outcome==1 else "incorrect"}.svg'))
 
 
 
-def plot_connected_dot_r_context(total_avg, output_path):
+def Figure4_B(total_avg, output_path):
     from utils.wf_plotting_utils import get_wf_scalebar
     seismic_palette = sns.diverging_palette(265, 10, s=100, l=40, sep=30, n=200, center="light", as_cmap=True)
     viridis_palette = cm.get_cmap('viridis')
@@ -621,29 +621,26 @@ def plot_connected_dot_r_context(total_avg, output_path):
         '(-5.0, 5.0)': 'k',
     }
 
-    stim_list = ['(-5.0, 5.0)']
-
     total_df = []
-    for stim in stim_list:
-        group = total_avg.loc[total_avg.opto_stim_coord==stim].reset_index(drop=True)
-        group['seed'] = group.apply(lambda x: x.variable.split("_")[0], axis=1)
+    group = total_avg.loc[total_avg.opto_stim_coord==stim].reset_index(drop=True)
+    group['seed'] = group.apply(lambda x: x.variable.split("_")[0], axis=1)
 
-        group['masked_data'] = group.groupby(by=['opto_stim_coord', 'context', 'correct_trial', 'seed']).apply(
-            lambda x: x.apply(
-                lambda y: np.where(x.loc[x.variable.str.contains('sigmas'), 'value'].values[0]>=1.8, y.value, np.nan), axis=1)).reset_index()[0]
+    group['masked_data'] = group.groupby(by=['opto_stim_coord', 'context', 'correct_trial', 'seed']).apply(
+        lambda x: x.apply(
+            lambda y: np.where(x.loc[x.variable.str.contains('sigmas'), 'value'].values[0]>=1.8, y.value, np.nan), axis=1)).reset_index()[0]
 
-        for i, row in group.iterrows():
-            if row.seed == '(-0.5, 0.5)':
-                continue
-            redim, coords = reduce_im_dimensions(row['masked_data'][np.newaxis])
-            df = generate_reduced_image_df(redim, coords)
-            df['context'] = row.context
-            df['seed'] = row.seed
-            df['correct_trial'] = row.correct_trial
-            df['variable'] = row.variable
-            df['opto_stim_coord'] = stim
-            df['color'] = color_dict[row.seed]
-            total_df+=[df]
+    for i, row in group.iterrows():
+        if row.seed == '(-0.5, 0.5)':
+            continue
+        redim, coords = reduce_im_dimensions(row['masked_data'][np.newaxis])
+        df = generate_reduced_image_df(redim, coords)
+        df['context'] = row.context
+        df['seed'] = row.seed
+        df['correct_trial'] = row.correct_trial
+        df['variable'] = row.variable
+        df['opto_stim_coord'] = '(-5.0, 5.0)'
+        df['color'] = color_dict[row.seed]
+        total_df+=[df]
             
     total_df = pd.concat(total_df).rename(columns={'dff0': 'value'})
     total_df['coord'] = total_df.apply(lambda x: f"({x.y}, {x.x})", axis=1)
@@ -677,6 +674,8 @@ def plot_connected_dot_r_context(total_avg, output_path):
             delta = delta_r_df[(delta_r_df.correct_trial==outcome) & (delta_r_df.opto_stim_coord==coord)]
             delta = delta[delta.seed != coord]
             delta['norm_r'] = np.round(np.clip((delta.r.values- -0.05)/(0.05 - -0.05), 0, 1), 2)
+
+            save_path = os.path.join(output_path, "Figure4_B")
 
             for c in total_df.context.unique():
                 fig, ax = plt.subplots(figsize=(4,4))
@@ -714,8 +713,8 @@ def plot_connected_dot_r_context(total_avg, output_path):
 
                 sm = plt.cm.ScalarMappable(cmap=viridis_palette, norm=plt.Normalize(vmin=0, vmax=1))
                 fig.colorbar(sm, ax=ax, fraction=0.046, pad=0.04)
-                fig.savefig(os.path.join(save_path, f'r_summary_{["rewarded" if c else "non-rewarded"][0]}.png'))
-                fig.savefig(os.path.join(save_path, f'r_summary_{["rewarded" if c else "non-rewarded"][0]}.svg'))
+                fig.savefig(os.path.join(save_path, f'Figure4_B_{["rewarded" if c else "non-rewarded"][0]}_{"correct" if outcome==1 else "incorrect"}.png'))
+                fig.savefig(os.path.join(save_path, f'Figure4_B_{["rewarded" if c else "non-rewarded"][0]}_{"correct" if outcome==1 else "incorrect"}.svg'))
 
             fig, ax = plt.subplots(figsize=(4,4))
             fig.suptitle(f"{coord} stim r between rois")
@@ -752,13 +751,11 @@ def plot_connected_dot_r_context(total_avg, output_path):
             ax.set_yticks(np.linspace(-3.5, 2.5,7))
             ax.set_ylim([-3.75, 2.75])
             ax.invert_xaxis()
-
-            save_path = os.path.join(output_path, f'{"correct" if outcome==1 else "incorrect"}')
             
             sm = plt.cm.ScalarMappable(cmap=seismic_palette, norm=plt.Normalize(vmin=0, vmax=1))
             fig.colorbar(sm, ax=ax, fraction=0.046, pad=0.04)
-            fig.savefig(os.path.join(save_path, 'r_summary_delta.png'))
-            fig.savefig(os.path.join(save_path, 'r_summary_delta.svg'))
+            fig.savefig(os.path.join(save_path, 'Figure4_B_delta_context.png'))
+            fig.savefig(os.path.join(save_path, 'Figure4_B_delta_context.svg'))
 
 
 
@@ -885,37 +882,60 @@ def compute_stats_barplot_context(df, output_path):
     return all_rois_stats, all_rois_stats_correct_vs_incorrect, selected_rois_stats, selected_rois_stats_correct_vs_incorrect
 
 
-def plot_mouse_barplot_r_choice(mouse_avg, output_path):
+# def plot_mouse_choice(mouse_avg, output_path):
 
-    stim_list = ['(-5.0, 5.0)']
+#     stim_list = ['(-5.0, 5.0)']
 
-    for stim in stim_list:
-        group = mouse_avg.loc[mouse_avg.opto_stim_coord==stim]
+#     for stim in stim_list:
+#         group = mouse_avg.loc[mouse_avg.opto_stim_coord==stim]
 
-        redim_df = []
-        for i, row in group.iterrows():
-            redim, coords = reduce_im_dimensions(row['value'][np.newaxis])
-            df = generate_reduced_image_df(redim, coords)
-            df['context'] = row.context
-            df['mouse_id'] = row.mouse_id
-            df['correct_trial'] = row.correct_trial
-            df['variable'] = row.variable
-            redim_df+=[df]
+#         redim_df = []
+#         for i, row in group.iterrows():
+#             redim, coords = reduce_im_dimensions(row['value'][np.newaxis])
+#             df = generate_reduced_image_df(redim, coords)
+#             df['context'] = row.context
+#             df['mouse_id'] = row.mouse_id
+#             df['correct_trial'] = row.correct_trial
+#             df['variable'] = row.variable
+#             redim_df+=[df]
             
-        redim_df = pd.concat(redim_df).rename(columns={'dff0': 'value'})
+#         redim_df = pd.concat(redim_df).rename(columns={'dff0': 'value'})
 
-        redim_df['seed'] = redim_df.apply(lambda x: x.variable.split("_")[0], axis=1)
-        redim_df['coord_order'] = redim_df.apply(lambda x: f"({x.y}, {x.x})", axis=1)
-        redim_df = redim_df.groupby(by=['mouse_id', 'context', 'correct_trial', 'coord_order', 'seed']).apply(lambda x: np.nan_to_num(x.loc[x.variable.str.contains("_r"), 'value'].values[0]) - np.nan_to_num(x.loc[x.variable.str.contains("_shuffle_mean"), 'value'].values[0])).reset_index().rename(columns={0:'r', 'coord_order': 'coord'})
+#         redim_df['seed'] = redim_df.apply(lambda x: x.variable.split("_")[0], axis=1)
+#         redim_df['coord_order'] = redim_df.apply(lambda x: f"({x.y}, {x.x})", axis=1)
+#         redim_df = redim_df.groupby(by=['mouse_id', 'context', 'correct_trial', 'coord_order', 'seed']).apply(lambda x: np.nan_to_num(x.loc[x.variable.str.contains("_r"), 'value'].values[0]) - np.nan_to_num(x.loc[x.variable.str.contains("_shuffle_mean"), 'value'].values[0])).reset_index().rename(columns={0:'r', 'coord_order': 'coord'})
         
-        save_path = os.path.join(output_path)
-        if not os.path.exists(save_path):
-            os.makedirs(save_path)
-        all_rois_stats, all_rois_stats_rew_vs_norew, selected_rois_stats, selected_rois_stats_rew_vs_norew = compute_stats_barplot_choice(redim_df, save_path)
+#         save_path = os.path.join(output_path)
+#         if not os.path.exists(save_path):
+#             os.makedirs(save_path)
+#         all_rois_stats, all_rois_stats_rew_vs_norew, selected_rois_stats, selected_rois_stats_rew_vs_norew = compute_stats_barplot_choice(redim_df, save_path)
     
 
-def compute_stats_barplot_choice(df, output_path):
-    df=df[~df.coord.isin(['(1.5, 4.5)', '(2.5, 4.5)', '(2.5, 5.5)'])]
+def compute_stats_barplot_choice(mouse_avg, output_path):
+
+    group = mouse_avg.loc[mouse_avg.opto_stim_coord=='(-5.0, 5.0)']
+
+    redim_df = []
+    for i, row in group.iterrows():
+        redim, coords = reduce_im_dimensions(row['value'][np.newaxis])
+        df = generate_reduced_image_df(redim, coords)
+        df['context'] = row.context
+        df['mouse_id'] = row.mouse_id
+        df['correct_trial'] = row.correct_trial
+        df['variable'] = row.variable
+        redim_df+=[df]
+        
+    redim_df = pd.concat(redim_df).rename(columns={'dff0': 'value'})
+
+    redim_df['seed'] = redim_df.apply(lambda x: x.variable.split("_")[0], axis=1)
+    redim_df['coord_order'] = redim_df.apply(lambda x: f"({x.y}, {x.x})", axis=1)
+    redim_df = redim_df.groupby(by=['mouse_id', 'context', 'correct_trial', 'coord_order', 'seed']).apply(lambda x: np.nan_to_num(x.loc[x.variable.str.contains("_r"), 'value'].values[0]) - np.nan_to_num(x.loc[x.variable.str.contains("_shuffle_mean"), 'value'].values[0])).reset_index().rename(columns={0:'r', 'coord_order': 'coord'})
+    
+    save_path = os.path.join(output_path)
+    if not os.path.exists(save_path):
+        os.makedirs(save_path)
+    
+    df=redim_df[~redim_df.coord.isin(['(1.5, 4.5)', '(2.5, 4.5)', '(2.5, 5.5)'])]
     all_rois_stats =[]
     for name, group in df.groupby(by=['context', 'seed', 'coord']):
         t, p = ttest_rel(group.loc[group.correct_trial==1, 'r'].to_numpy(), group.loc[group.correct_trial==0, 'r'].to_numpy())
@@ -1179,6 +1199,10 @@ def plot_connected_dot_r_choice(total_avg, output_path):
 
 def main(data, output_path):
 
+    if not os.path.exitst(os.path.join(output_path, 'figure4A_B')):
+        os.makedirs(os.path.join(output_path, 'figure4A_B'))
+        os.makedirs(os.path.join(output_path, 'figure4_supp1'))
+
     data['opto_stim_coord'] = '(-5.0, 5.0)'
     data.value = data.apply(lambda x: x.value[0] if 'percentile' not in x.variable else x.value, axis=1)
     mouse_avg = data.groupby(by=['mouse_id', 'opto_stim_coord', 'context', 'correct_trial', 'variable'])['value'].apply(
@@ -1218,41 +1242,3 @@ def main(data, output_path):
 
     plot_mouse_barplot_r_choice(mouse_avg, os.path.join(output_path, 'choice'))
     plot_connected_dot_r_choice(total_avg, os.path.join(output_path, 'choice'))
-
-
-if __name__ == "__main__":
-
-    root = r"/mnt/lsens-analysis/Pol_Bech/Pop_results/Context_behaviour/pixel_correlations_final"
-    dataset = f'pixel_cross_correlation_jrgeco_expert'
-
-    print(f"Analyzing {dataset}")
-
-    result_folder = os.path.join(root, dataset)
-    if not os.path.exists(os.path.join(result_folder, 'results')):
-        os.makedirs(os.path.join(result_folder, 'results'), exist_ok=True)
-
-    load_data=True
-
-    if load_data==True and os.path.exists(os.path.join(result_folder, 'results', "combined_avg_correlation_results.json")):
-        data = pd.read_json(os.path.join(result_folder, 'results',"combined_avg_correlation_results.json"))
-        data['value'] = data.value.apply(lambda x: np.asarray(x, dtype=float))
-
-        print(f'{dataset} results loaded')
-
-    else:
-        data = []
-        all_files = glob.glob(os.path.join(result_folder, "**", "*", "correlation_table.parquet.gzip"))
-
-        for file in tqdm(all_files):
-            session_data = preprocess_corr_results(file)
-            data += [session_data]
-
-        data = pd.concat(data, axis=0, ignore_index=True)
-        if not os.path.exists(os.path.join(result_folder, 'results')):
-            os.makedirs(os.path.join(result_folder, 'results'))
-
-        data.to_json(os.path.join(result_folder, 'results', "combined_avg_correlation_results.json"))
-        data = pd.read_json(os.path.join(result_folder, 'results',"combined_avg_correlation_results.json"))
-        data['value'] = data.value.apply(lambda x: np.asarray(x, dtype=float))
- 
-    main(data, output_path = os.path.join(result_folder, 'results', 'figure4A'))
