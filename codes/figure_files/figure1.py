@@ -1,10 +1,9 @@
-import os
-from pathlib import Path
+﻿import os
 import pandas as pd
 from codes.utils import figure1B, figure1C, figure1D, figure1E, figure1FG, figure1H, figure1IJ, figure1KL
 
 # Get main data and saving dir
-main_dir = os.path.abspath(os.path.join(os.getcwd(), "..", ".."))
+main_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 fig_folder = os.path.join(main_dir, 'figures', 'figure1')
 if not os.path.exists(fig_folder):
     os.makedirs(fig_folder)

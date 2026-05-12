@@ -20,3 +20,9 @@ Step 3: Download the processed data folder
 Step 4: Placed the processed data folder into the 'Bech_Dard_plot_figures' folder
 
 Step 5: Run the figure files, it produces a 'figures' folder containing panels from the figures
+
+  ```ruby
+   cd C:\path\to\Bech_Dard_plot_figures
+   
+   python -m codes.figure_files.figure1
+```
