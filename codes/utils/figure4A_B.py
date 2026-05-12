@@ -13,8 +13,8 @@ from matplotlib.colors import LinearSegmentedColormap
 from scipy.stats import ttest_1samp, ttest_rel
 from tqdm import tqdm
 
-from utils.haas_utils import *
-from utils.wf_plotting_utils import get_wf_scalebar, plot_single_frame, reduce_im_dimensions, plot_grid_on_allen, generate_reduced_image_df
+from codes.utils.misc.plot_on_grid import get_wf_scalebar, reduce_im_dimensions, plot_grid_on_allen, generate_reduced_image_df
+from codes.utils.misc.plot_on_allen import plot_wf_single_frame
 
 
 def preprocess_corr_results(file):

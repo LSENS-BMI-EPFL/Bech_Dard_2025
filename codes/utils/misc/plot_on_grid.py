@@ -1,10 +1,57 @@
 import os
 import numpy as np
+import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib.pyplot import get_cmap
 from matplotlib.colors import TwoSlopeNorm, LinearSegmentedColormap, Normalize
 from skimage.transform import rescale
 import seaborn as sns
+
+
+
+def reduce_im_dimensions(image):
+    y = np.linspace(-5, 0, 6, endpoint=True).astype(int) - 0.5 # x and y flip between original images and reduced images because original images are landscape (125, 160) and plot_grid_on_allen is portrait
+    x = np.linspace(-2, 4, 7, endpoint=True).astype(int) - 0.5
+    xn, yn = np.meshgrid(x, y)
+    bregma = (88, 120)
+    scale = 1
+    scalebar = 18
+    wf_x = bregma[0] - xn * scalebar
+    wf_y = bregma[1] + yn * scalebar
+
+    coords = []
+    im_downsampled =[]
+    for x,y in zip(np.flip(wf_x).flatten().astype(int), wf_y.flatten().astype(int)):
+        if int(x)==133 and int(y)==21:
+            continue
+        rr,cc = disk((x, y), scalebar/2)
+        im_downsampled += [np.nanmean(image[:, cc, rr], axis=1)]
+        rev_x, rev_y = -(bregma[0]-x)/scalebar, -(y-bregma[1])/scalebar # Here x and y are flipped because the original wf images are horizontal, and the to be displayed plot_grid_on_allen is vertical
+        coords.append([rev_x, rev_y]) # Appended as (AP, ML) coordinates
+
+    return np.stack(im_downsampled, axis=1), np.stack(coords)
+
+
+def generate_reduced_image_df(image, coords):
+
+    total_df = []
+    for i in range(image.shape[0]):
+        df = map_coords_to_image(image[i], coords=coords)
+        df['frame'] = i
+        total_df += [df]
+    return pd.concat(total_df)
+
+
+def map_coords_to_image(im, coords):
+
+    total_im=[]
+    for i, c in enumerate(coords):
+        im_dict ={}
+        im_dict['x'] = c[1]
+        im_dict['y'] = c[0]
+        im_dict['dff0'] = im[i]
+        total_im += [im_dict]
+    return pd.DataFrame(total_im)
 
 
 def plot_grid_on_allen(grid, outcome, palette, facecolor, edgecolor, result_path, dotsize=300, dotmarker='o',
