@@ -72,7 +72,6 @@ def load_opto_data(group):
     return opto_avg_df
 
 
-    
 def plot_example_stim_images(nwb_files, result_path):
 
     from utils.wf_plotting_utils import plot_single_frame

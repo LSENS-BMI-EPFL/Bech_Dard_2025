@@ -1,9 +1,9 @@
-import os
+﻿import os
 from pathlib import Path
 from codes.utils import figure1_supp3
 
 # Get main data and saving dir
-main_dir = os.path.abspath(os.path.join(os.getcwd(), "..", ".."))
+main_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 fig_folder = os.path.join(main_dir, 'figures', 'supplementary', 'figure1_supp3')
 if not os.path.exists(fig_folder):
     os.makedirs(fig_folder)
