@@ -50,21 +50,6 @@ def Figure4_supp1_A(df, roi, save_path, vmin=-0.1, vmax=0.1):
     total_avg = df.groupby(by=['context', 'variable'])['value'].apply(lambda x: np.array(x.tolist()).mean(axis=0)).reset_index()
 
     seismic_palette = sns.diverging_palette(265, 10, s=100, l=40, sep=30, n=200, center="light", as_cmap=True)
-    
-    # fig, ax = plt.subplots(1, 3, figsize=(8, 4))
-    # fig.suptitle(f"{roi} block average")
-    # plot_wf_single_frame(total_avg.loc[(total_avg.context == 1) & (total_avg.variable == f"{roi}_r"), 'value'].values[0],
-    #                     title='Rewarded', facecolor=None, edgecolor=None,
-    #                     colormap='viridis', vmin=0.3, vmax=0.6, norm=False, fig=fig, ax=ax[0])
-    # plot_wf_single_frame(total_avg.loc[(total_avg.context == 0) & (total_avg.variable == f"{roi}_r"), 'value'].values[0],
-    #                     title='Non-Rewarded', facecolor=None, edgecolor=None,
-    #                     colormap='viridis', vmin=0.3, vmax=0.6, norm=False, fig=fig, ax=ax[1])
-    # im = total_avg.loc[(total_avg.context == 1) & (total_avg.variable == f"{roi}_r"), 'value'].values[0] - \
-    #         total_avg.loc[(total_avg.context == 0) & (total_avg.variable == f"{roi}_r"), 'value'].values[0]
-
-    # plot_siplot_wf_single_framengle_frame(im, title='R+ - R-', facecolor=None, edgecolor=None,
-    #                     colormap=seismic_palette, vmin=vmin, vmax=vmax, norm=False, fig=fig, ax=ax[2])
-    # fig.savefig(os.path.join(save_path, f"{roi}_r.png"))
 
     fig, ax = plt.subplots(1, 3, figsize=(8, 4))
     fig.suptitle(f"R - shuffle")
@@ -891,7 +876,7 @@ def main(data, output_path):
     for roi in ['(-1.5, 0.5)', '(-1.5, 3.5)', '(-1.5, 4.5)', '(1.5, 3.5)', '(0.5, 4.5)', '(1.5, 1.5)', '(2.5, 2.5)']:
 
         print(f"Plotting total averages for roi {roi}")
-        save_path = os.path.join(output_path, 'context', 'figure4_supp1', 'figure4_supp1_A', roi)
+        save_path = os.path.join(output_path, 'figure4_supp1', 'figure4_supp1_A', roi)
         if not os.path.exists(save_path):
             os.makedirs(save_path)
         Figure4_supp1_A(total_avg.loc[total_avg.correct_trial==1], roi, save_path)

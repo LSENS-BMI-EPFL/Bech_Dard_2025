@@ -1,12 +1,12 @@
 import os
 import numpy as np
 import pandas as pd
+from skimage.draw import disk
 import matplotlib.pyplot as plt
 from matplotlib.pyplot import get_cmap
 from matplotlib.colors import TwoSlopeNorm, LinearSegmentedColormap, Normalize
 from skimage.transform import rescale
 import seaborn as sns
-
 
 
 def reduce_im_dimensions(image):
