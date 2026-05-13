@@ -412,8 +412,8 @@ def enforce_sign_consistency(pca, reference_feature_idx=9):
 
 def Figure4_DG_supp2_BD(data_path, opto_data_path, output_path):
 
-    if not os.path.exists(result_path):
-        os.makedirs(result_path)
+    if not os.path.exists(output_path):
+        os.makedirs(output_path)
 
     coords_list = {'wS1': "(-1.5, 3.5)", 'wS2': "(-1.5, 4.5)", 'wM1': "(1.5, 1.5)", 'wM2': "(2.5, 1.5)", 'RSC': "(-0.5, 0.5)", "RSC_2": "(-1.5, 0.5)",
             'ALM': "(2.5, 2.5)", 'tjS1':"(0.5, 4.5)", 'tjM1':"(1.5, 3.5)", 'control': "(-5.0, 5.0)"}
