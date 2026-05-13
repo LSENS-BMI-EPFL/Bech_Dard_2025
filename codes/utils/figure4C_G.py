@@ -44,7 +44,7 @@ def load_wf_opto_data(data_path):
     return pd.concat(total_df, ignore_index=True)
 
 
-def load_opto_data(nwb_files, opto_result_path):
+def load_opto_data(opto_result_path):
     single_mouse_result_files = glob.glob(os.path.join(opto_result_path, "*", "opto_data.json"))
     mice=[]
     for file in single_mouse_result_files:
@@ -61,42 +61,6 @@ def load_opto_data(nwb_files, opto_result_path):
     opto_df = opto_df.reset_index(drop=True)
     opto_df['opto_stim_coord'] = opto_df.apply(lambda x: tuple([x.opto_grid_ap, x.opto_grid_ml]), axis=1)
     return opto_df.loc[opto_df.mouse_id.isin(mice)]
-
-
-def load_opto_data_old(group, data_path):
-    
-    single_mouse_result_files = glob.glob(os.path.join(data_path, "*", "opto_data.json"))
-    opto_df = []
-    for file in single_mouse_result_files:
-        d= pd.read_json(file)
-        d['mouse_name'] = [file.split("/")[-2] for i in range(d.shape[0])]
-        opto_df += [d]
-    opto_df = pd.concat(opto_df)
-    opto_df = opto_df.loc[opto_df.opto_grid_ap!=3.5]
-    opto_avg_df = opto_df.groupby(by=['context', 'trial_type', 'opto_grid_ml', 'opto_grid_ap']).agg(
-                                                                                 data=('data_mean', list),
-                                                                                 data_sub=('data_mean_sub', list),
-                                                                                 data_mean=('data_mean', 'mean'),
-                                                                                 data_mean_sub=(
-                                                                                 'data_mean_sub', 'mean'),
-                                                                                 shuffle_dist=('shuffle_dist', 'sum'),
-                                                                                 shuffle_dist_sub=(
-                                                                                 'shuffle_dist_sub', 'sum'),
-                                                                                 percentile_avg=('percentile', 'mean'),
-                                                                                 percentile_avg_sub=(
-                                                                                 'percentile_sub', 'mean'),
-                                                                                 n_sigma_avg=('n_sigma', 'mean'),
-                                                                                 n_sigma_avg_sub=(
-                                                                                 'n_sigma_sub', 'mean'))
-    opto_avg_df['shuffle_mean'] = opto_avg_df.apply(lambda x: np.mean(x.shuffle_dist), axis=1)
-    opto_avg_df['shuffle_std'] = opto_avg_df.apply(lambda x: np.std(x.shuffle_dist), axis=1)
-    opto_avg_df['shuffle_mean_sub'] = opto_avg_df.apply(lambda x: np.mean(x.shuffle_dist_sub), axis=1)
-    opto_avg_df['shuffle_std_sub'] = opto_avg_df.apply(lambda x: np.std(x.shuffle_dist_sub), axis=1)
-
-    opto_avg_df = opto_avg_df.reset_index()
-    opto_avg_df['opto_stim_coord'] = opto_avg_df.apply(lambda x: tuple([x.opto_grid_ap, x.opto_grid_ml]), axis=1)
-    return opto_avg_df
-
 
     
 def plot_example_stim_images(nwb_files, result_path): ## this needs nwb wrappers
@@ -153,7 +117,7 @@ def plot_example_stim_images(nwb_files, result_path): ## this needs nwb wrappers
 
 def Figure4_D_Figure4_supp2_D(control_df, pc_df, result_path):
 
-    roi_list = ['(-1.5, 3.5)', '(-1.5, 4.5)', '(1.5, 1.5)', '(-1.5, 0.5)', '(0.5, 4.5)', '(2.5, 2.5)']
+    roi_list = ['(-1.5, 3.5)', '(-1.5, 4.5)', '(1.5, 1.5)', '(-1.5, 0.5)', '(2.5, 2.5)', '(0.5, 4.5)']
 
     fig, ax = plt.subplots(2,6, figsize=(24,8))
     fig.suptitle('PC1')
@@ -163,18 +127,15 @@ def Figure4_D_Figure4_supp2_D(control_df, pc_df, result_path):
     fig2.suptitle('PC3')
 
     for i, stim in enumerate(roi_list):
-
+        ax[0, i].set_title(stim)
+        ax1[0, i].set_title(stim)
+        ax2[0, i].set_title(stim)
 
         for j, (name, subgroup) in enumerate(control_df.groupby('context')):
             if name=='rewarded':
                 whisker = ['#83f28f', '#348A18']
             else:
                 whisker = ['#D9C4EC', '#6E188A']
-
-            if i==0:
-                ax[0, i].set_title(name)
-                ax1[0, i].set_title(name)
-                ax2[0, i].set_title(name)
 
             trial = 'whisker_trial'
             group = subgroup[subgroup.trial_type == 'whisker_trial']
@@ -244,7 +205,8 @@ def compute_angle_stim_lick(control_df, pc_df, result_path):
         columns=['mouse_id', 'legend']
     ).groupby(by=['context', 'trial_type', 'opto_stim_coord', 'lick_flag', 'time']).apply('mean').reset_index()
     stim = pc_df.loc[(pc_df.time>=0) & (pc_df.trial_type=='whisker_trial') & (pc_df.opto_stim_coord!='(-5.0, 5.0)')]
-    for pc in ['PC 1', 'PC 2', 'PC 3']:
+    
+    for pc in ['PC 3']:
         control[pc] = control[pc] + stim[pc].min()
         stim[pc] = stim[pc] + stim[pc].min()
 
@@ -254,7 +216,7 @@ def compute_angle_stim_lick(control_df, pc_df, result_path):
         lick_sim = np.diag(cosine_similarity(group['PC 3'].reset_index(drop=True).reset_index().to_numpy(), control.loc[(control.context==context) & (control.lick_flag==1), 'PC 3'].reset_index(drop=True).reset_index().to_numpy()))
         nolick_sim = np.diag(cosine_similarity(group['PC 3'].reset_index(drop=True).reset_index().to_numpy(), control.loc[(control.context==context) & (control.lick_flag==0), 'PC 3'].reset_index(drop=True).reset_index().to_numpy()))
 
-        for pc in ['PC 1', 'PC 2', 'PC 3']:
+        for pc in ['PC 3']:
             v1 = group[pc].to_numpy().flatten()/np.linalg.norm(group[pc].to_numpy().flatten())
             v2 = control.loc[(control.context==context) & (control.lick_flag==1), pc].to_numpy().flatten()/np.linalg.norm(control.loc[(control.context==context) & (control.lick_flag==1), pc].to_numpy().flatten())
             v3 = control.loc[(control.context==context) & (control.lick_flag==0), pc].to_numpy().flatten()/np.linalg.norm(control.loc[(control.context==context) & (control.lick_flag==0), pc].to_numpy().flatten())
@@ -341,8 +303,10 @@ def Figure4_F_G_correlations(opto_df, angle_df, result_path):
     if not os.path.exists(save_path):
         os.makedirs(save_path)    
     opto_df = opto_df[opto_df.trial_type=='whisker_trial']
-    angle_df['colors'] = angle_df.apply(lambda x: roi_color[x.opto_stim_coord] if x.opto_stim_coord in roi_color.keys() else "#808080", axis=1)
+    opto_df = opto_df[opto_df.mouse_id.isin(angle_df.mouse_id.unique())]
 
+    angle_df['colors'] = angle_df.apply(lambda x: roi_color[x.opto_stim_coord] if x.opto_stim_coord in roi_color.keys() else "#808080", axis=1)
+    
     avg_angle_df = angle_df.drop(columns=['mouse_id']).groupby(by=['pc', 'context', 'opto_stim_coord', 'colors'], as_index=False, sort=False).agg('mean')
     avg_opto_df = opto_df.loc[opto_df.trial_type=='whisker_trial'].drop(
         columns=['mouse_id', 'index', 'opto_grid_ml', 'opto_grid_ap', 'shuffle_mean', 'shuffle_std', 'context_background',
@@ -409,8 +373,6 @@ def Figure4_supp2_BC(pca, result_path):
     for ext in ['.png', '.svg']:
         fig.savefig(Path(result_path, f'Figure4_supp2_B{ext}'))
 
-    ## Plot biplots to see which variables (i.e. rois) contain most of the explained variance (?)
-
     coeff = np.transpose(pca.components_)
 
     ## Plot loadings in allen ccf
@@ -422,8 +384,7 @@ def Figure4_supp2_BC(pca, result_path):
        '(-3.5, 2.5)', '(-3.5, 3.5)', '(-3.5, 4.5)', '(-3.5, 5.5)',
        '(0.5, 0.5)', '(0.5, 1.5)', '(0.5, 2.5)', '(0.5, 3.5)', '(0.5, 4.5)',
        '(0.5, 5.5)', '(1.5, 0.5)', '(1.5, 1.5)', '(1.5, 2.5)', '(1.5, 3.5)',
-       '(1.5, 4.5)', '(1.5, 5.5)', '(2.5, 0.5)', '(2.5, 1.5)', '(2.5, 2.5)',
-       '(2.5, 3.5)', '(2.5, 4.5)', '(2.5, 5.5)']
+       '(1.5, 4.5)', '(2.5, 0.5)', '(2.5, 1.5)', '(2.5, 2.5)', '(2.5, 3.5)']
     fig, ax = plt.subplots(1, 3, figsize=(7, 12))
     fig.suptitle("PC1-3 loadings")
 
@@ -435,6 +396,24 @@ def Figure4_supp2_BC(pca, result_path):
         ax.flat[i].set_title(f"PC {i+1}")
     fig.savefig(os.path.join(result_path, f"Figure4_supp2_C.png"))
 
+
+def enforce_sign_consistency(pca, reference_feature_idx=9):
+    """
+    Checks PCA coefficient signs and aligns them to the paper, since they can flip arbitrarily between runs due to the nature of PCA.
+    Args:
+        pca: The fitted PCA object containing the components.
+        reference_feature_idx: The index of the reference feature (default is 9, corresponding to '(-1.5, 3.5)').
+    """
+    for i in range(pca.n_components):
+        if i==0 and pca.components_[i, reference_feature_idx] < 0:
+            pca.components_[i, :] *= -1
+        elif i!=0 and pca.components_[i, reference_feature_idx] > 0:
+            pca.components_[i, :] *= -1
+        else:
+            continue
+
+    return pca
+    
 
 def dimensionality_reduction(data_path, output_path):
     # result_path = Path(output_path, 'PCA_150')
@@ -449,8 +428,10 @@ def dimensionality_reduction(data_path, output_path):
 
     group = 'controls' if 'control' in str(output_path) else 'VGAT'
 
-    opto_data_path = fr'//sv-nas1.rcp.epfl.ch/Petersen-Lab/analysis/Pol_Bech/Pop_results/Context_behaviour/optogenetic_results/{group}'
-    opto_df = load_opto_data(group, opto_data_path)
+    # opto_data_path = fr'//sv-nas1.rcp.epfl.ch/Petersen-Lab/analysis/Pol_Bech/Pop_results/Context_behaviour/optogenetic_results/{group}'
+    # opto_data_path = fr'//sv-nas1.rcp.epfl.ch/Petersen-Lab/analysis/Pol_Bech/Pop_results/Context_behaviour/opto_widefield_pca/{group}/opto_results'
+    opto_data_path = fr'//sv-nas1.rcp.epfl.ch/Petersen-Lab/analysis/Pol_Bech/Pop_results/Context_behaviour/optogenetic_widefield_results/{group}/opto_results'
+    opto_df = load_opto_data(opto_data_path)
     opto_df = opto_df[~opto_df.opto_stim_coord.astype(str).isin(["(1.5, 5.5)", "(2.5, 4.5)", "(2.5, 5.5)"])]
     
     total_df = load_wf_opto_data(data_path)
@@ -490,11 +471,13 @@ def dimensionality_reduction(data_path, output_path):
     scaler = StandardScaler()
     fit_scaler = scaler.fit(avg_data_for_pca)
     avg_data_for_pca = fit_scaler.transform(avg_data_for_pca)
-    pca = PCA(n_components=15)
+    pca = PCA(n_components=3)
     results = pca.fit(np.nan_to_num(avg_data_for_pca))
 
-    # Plot coefficients, biplots and variance explained
-    Figure4_supp2_BC(pca, result_path)
+    # Enforce coefficient sign
+    pca = enforce_sign_consistency(pca, reference_feature_idx=9) ## 9 corresponds to the index in the roi list for wS1
+    # Plot coefficients and variance explained
+    # Figure4_supp2_BC(pca, result_path)
 
     subset_df = mouse_df[
         (mouse_df.trial_type.isin(['whisker_trial', 'no_stim_trial'])) & 
