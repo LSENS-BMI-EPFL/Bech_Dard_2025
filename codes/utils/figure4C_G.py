@@ -77,7 +77,7 @@ def Figure4C(data_path, result_path):
 
             for i in range(9, 16):
                 fig, ax = plt.subplots()
-                plot_single_frame(im_seq[i], f"Frame {i-10}", fig=fig, ax=ax, norm=True, colormap='hotcold', vmin=-0.03, vmax=0.03)
+                plot_wf_single_frame(im_seq[i], f"Frame {i-10}", facecolor=None, edgecolor=None, fig=fig, ax=ax, norm=True, colormap='hotcold', vmin=-0.03, vmax=0.03)
                 fig.savefig(os.path.join(save_path, f'whisker_stim_frame_{i-10}.png'))
 
 
@@ -94,14 +94,14 @@ def Figure4_supp2_A(data_path, result_path):
 
         for i in range(9, 16):
             fig, ax = plt.subplots()
-            plot_single_frame(im_seq[i], f"Frame {i-10}", fig=fig, ax=ax, norm=True, colormap='hotcold', vmin=-0.03, vmax=0.03)
+            plot_wf_single_frame(im_seq[i], f"Frame {i-10}", facecolor=None, edgecolor=None, fig=fig, ax=ax, norm=True, colormap='hotcold', vmin=-0.03, vmax=0.03)
             fig.savefig(os.path.join(save_path, f'whisker_stim_frame_{i-10}.png'))
 
         im_seq = group.loc[(group.trial_type=='no_stim_trial') & (group.opto_stim_coord==loc), 'wf_image_sub'].to_numpy()[0]
 
         for i in range(9, 16):
             fig, ax = plt.subplots()
-            plot_single_frame(im_seq[i], f"Frame {i-10}", fig=fig, ax=ax, norm=True, colormap='hotcold', vmin=-0.03, vmax=0.03)
+            plot_wf_single_frame(im_seq[i], f"Frame {i-10}", facecolor=None, edgecolor=None, fig=fig, ax=ax, norm=True, colormap='hotcold', vmin=-0.03, vmax=0.03)
             fig.savefig(os.path.join(save_path, f'no_stim_frame_{i-10}.png'))
 
 
@@ -124,8 +124,10 @@ def Figure4_D_Figure4_supp2_D(control_df, pc_df, result_path):
         for j, (name, subgroup) in enumerate(control_df.groupby('context')):
             if name=='rewarded':
                 whisker = ['#83f28f', '#348A18']
+                idx=0
             else:
                 whisker = ['#D9C4EC', '#6E188A']
+                idx=1
 
             trial = 'whisker_trial'
             group = subgroup[subgroup.trial_type == 'whisker_trial']
@@ -135,19 +137,19 @@ def Figure4_D_Figure4_supp2_D(control_df, pc_df, result_path):
                             y='PC 1', 
                             hue='legend', 
                             hue_order = ['(-5.0, 5.0) - no lick', '(-5.0, 5.0) - lick'], 
-                            palette=whisker, estimator='mean', errorbar=('ci', 95), ax=ax[j, i])
+                            palette=whisker, estimator='mean', errorbar=('ci', 95), ax=ax[idx, i])
             sns.lineplot(group, 
                             x='time', 
                             y='PC 2', 
                             hue='legend', 
                             hue_order = ['(-5.0, 5.0) - no lick', '(-5.0, 5.0) - lick'], 
-                            palette=whisker, estimator='mean', errorbar=('ci', 95), ax=ax1[j, i])                    
+                            palette=whisker, estimator='mean', errorbar=('ci', 95), ax=ax1[idx, i])                    
             sns.lineplot(group, 
                             x='time', 
                             y='PC 3', 
                             hue='legend', 
                             hue_order = ['(-5.0, 5.0) - no lick', '(-5.0, 5.0) - lick'], 
-                            palette=whisker, estimator='mean', errorbar=('ci', 95), ax=ax2[j, i])                    
+                            palette=whisker, estimator='mean', errorbar=('ci', 95), ax=ax2[idx, i])                    
 
             group = pc_df.loc[(pc_df.context==name) & (pc_df.trial_type==trial) & (pc_df.opto_stim_coord==stim)]
 
@@ -155,26 +157,26 @@ def Figure4_D_Figure4_supp2_D(control_df, pc_df, result_path):
             sns.lineplot(group, 
                             x='time', 
                             y='PC 1', 
-                            color='royalblue', estimator='mean', errorbar=('ci', 95), ax=ax[j, i])
+                            color='royalblue', estimator='mean', errorbar=('ci', 95), ax=ax[idx, i])
             sns.lineplot(group, 
                             x='time', 
                             y='PC 2', 
-                            color='royalblue', estimator='mean', errorbar=('ci', 95), ax=ax1[j, i])                    
+                            color='royalblue', estimator='mean', errorbar=('ci', 95), ax=ax1[idx, i])                    
             sns.lineplot(group, 
                             x='time', 
                             y='PC 3', 
-                           color='royalblue', estimator='mean', errorbar=('ci', 95), ax=ax2[j, i]) 
+                           color='royalblue', estimator='mean', errorbar=('ci', 95), ax=ax2[idx, i]) 
                            
-            ax[j,i].set_ylim(-35,35)
-            ax[j,i].set_ylabel('PC 1')
+            ax[idx,i].set_ylim(-35,35)
+            ax[idx,i].set_ylabel('PC 1')
 
-            ax1[j,i].set_ylim(-15,10)
-            ax1[j,i].set_ylabel('PC 2')
+            ax1[idx,i].set_ylim(-15,10)
+            ax1[idx,i].set_ylabel('PC 2')
 
-            ax2[j,i].set_ylim(-15,5)
-            ax2[j,i].set_ylabel('PC 3')
+            ax2[idx,i].set_ylim(-15,5)
+            ax2[idx,i].set_ylabel('PC 3')
 
-    save_path = os.path.join(result_path, 'supplementary')
+    save_path = os.path.join(result_path, 'figure4_supp2')
     if not os.path.exists(save_path):
         os.makedirs(save_path)
 
@@ -188,8 +190,8 @@ def Figure4_D_Figure4_supp2_D(control_df, pc_df, result_path):
     fig2.savefig(os.path.join(save_path, f"Figure4_supp2_D_bot.png"))
     fig2.savefig(os.path.join(save_path, f"Figure4_supp2_D_bot.svg"))
 
-    fig2.savefig(os.path.join(result_path, f"Figure4_D.png"))
-    fig2.savefig(os.path.join(result_path, f"Figure4_D.svg"))
+    fig2.savefig(os.path.join(result_path, 'figure4C_G', f"Figure4_D.png"))
+    fig2.savefig(os.path.join(result_path, 'figure4C_G', f"Figure4_D.svg"))
 
 
 def compute_angle_stim_lick(control_df, pc_df, result_path):
@@ -416,10 +418,6 @@ def Figure4_DG_supp2_BD(data_path, opto_data_path, output_path):
     coords_list = {'wS1': "(-1.5, 3.5)", 'wS2': "(-1.5, 4.5)", 'wM1': "(1.5, 1.5)", 'wM2': "(2.5, 1.5)", 'RSC': "(-0.5, 0.5)", "RSC_2": "(-1.5, 0.5)",
             'ALM': "(2.5, 2.5)", 'tjS1':"(0.5, 4.5)", 'tjM1':"(1.5, 3.5)", 'control': "(-5.0, 5.0)"}
 
-
-    group = 'controls' if 'control' in str(output_path) else 'VGAT'
-
-    opto_data_path = fr'//sv-nas1.rcp.epfl.ch/Petersen-Lab/analysis/Pol_Bech/Pop_results/Context_behaviour/optogenetic_widefield_results/{group}/opto_results'
     opto_df = load_opto_data(opto_data_path)
     opto_df = opto_df[~opto_df.opto_stim_coord.astype(str).isin(["(1.5, 5.5)", "(2.5, 4.5)", "(2.5, 5.5)"])]
     
@@ -467,7 +465,7 @@ def Figure4_DG_supp2_BD(data_path, opto_data_path, output_path):
     pca = enforce_sign_consistency(pca, reference_feature_idx=9) ## 9 corresponds to the index in the roi list for wS1
 
     # Plot coefficients and variance explained
-    Figure4_supp2_BC(pca, os.path.join(output_path, 'supplementary'))
+    Figure4_supp2_BC(pca, os.path.join(output_path, 'figure4_supp2'))
 
     subset_df = mouse_df[
         (mouse_df.trial_type.isin(['whisker_trial', 'no_stim_trial'])) & 
@@ -509,16 +507,20 @@ def Figure4_DG_supp2_BD(data_path, opto_data_path, output_path):
     Figure4_D_Figure4_supp2_D(control_df, pc_df[pc_df.opto_stim_coord!="(-5.0, 5.0)"], output_path)
 
     angle_df = compute_angle_stim_lick(control_df, pc_df[pc_df.opto_stim_coord!="(-5.0, 5.0)"], output_path)
-    Figure4_E(angle_df, output_path)
+    Figure4_E(angle_df, os.path.join(output_path, 'figureC_G'))
 
     avg_angle_df = angle_df.drop(columns='mouse_id').groupby(by=['pc', 'context', 'opto_stim_coord'], as_index=False, sort=False).agg('mean')
-    Figure4_F_G_map(avg_angle_df, output_path)
-    Figure4_F_G_correlations(opto_df, angle_df, output_path)
+    Figure4_F_G_map(avg_angle_df, os.path.join(output_path, 'figureC_G'))
+    Figure4_F_G_correlations(opto_df, angle_df, os.path.join(output_path, 'figureC_G'))
 
 
 def main(data_path_4C, data_path_4DG, data_path_4_supp, opto_data_path, output_path):
 
-    Figure4C(data_path_4C, output_path)
-    Figure4_supp2_A(data_path_4_supp, os.path.join(output_path, 'supplementary'))
+    if not os.path.exitst(os.path.join(output_path, 'figure4C_G')):
+        os.makedirs(os.path.join(output_path, 'figureC_G'))
+        os.makedirs(os.path.join(output_path, 'figure4_supp2'))
+
+    Figure4C(data_path_4C, os.path.join(output_path, 'figure4C_G'))
+    Figure4_supp2_A(data_path_4_supp, os.path.join(output_path, 'figure4_supp2'))
 
     Figure4_DG_supp2_BD(data_path=data_path_4DG, opto_data_path=opto_data_path, output_path=output_path)

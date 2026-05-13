@@ -6,8 +6,8 @@ from codes.utils import figure4A_B, figure4C_G
 # Get main data and saving dir
 main_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 fig_folder = os.path.join(main_dir, 'figures', 'figure4')
-if not os.path.exists(os.path.join(fig_folder, 'supplementary')):
-    os.makedirs(os.path.join(fig_folder, 'supplementary'))
+if not os.path.exists(fig_folder):
+    os.makedirs(fig_folder)
 
 
 # 4A-B
@@ -21,6 +21,7 @@ data_path_4C = os.path.join(main_dir, 'data', 'figure4', '4C')
 data_path_4DG = os.path.join(main_dir, 'data', 'figure4', '4DG', 'VGAT')
 data_path_4_supp = os.path.join(main_dir, 'data', 'figure4_supp', '2A')
 opto_data_path = os.path.join(main_dir, 'data', 'figure2', '2CDE', 'VGAT')
+
 figure4C_G.main(data_path_4C = os.path.join(main_dir, 'data', 'figure4', '4C'),
                 data_path_4DG = os.path.join(main_dir, 'data', 'figure4', '4DG', 'VGAT'),
                 data_path_4_supp = os.path.join(main_dir, 'data', 'figure4_supp', '2A'), 
