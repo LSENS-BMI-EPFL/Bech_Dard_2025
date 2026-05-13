@@ -111,8 +111,6 @@ def Figure4_supp1_A(df, roi, save_path, vmin=-0.1, vmax=0.1):
                          title='Non-Rewarded',
                          colormap='viridis', vmin=0.3, vmax=0.6, suptitle='', saving_path='',
                          save_formats=[], figure=fig, ax_to_plot=ax[1])
-    im = total_avg.loc[(total_avg.context == 1) & (total_avg.variable == f"{roi}_nsigmas"), 'value'].values[0] - \
-            total_avg.loc[(total_avg.context == 0) & (total_avg.variable == f"{roi}_nsigmas"), 'value'].values[0]
 
     plot_wf_single_frame(mask_r-mask_non_r, title='R+ - R-',
                          colormap=seismic_palette, vmin=-0.1, vmax=0.1, suptitle='', saving_path='',
@@ -175,22 +173,20 @@ def Figure4_supp1_B_C(data, output_path):
                 
             sub_r = subgroup[(subgroup.seed.isin([seed, dest])) & (subgroup.coord.isin([seed, dest]))]
             sub_r = sub_r[sub_r.seed != sub_r.coord]
-            sub_r = sub_r.groupby(by=['mouse_id']).mean().reset_index()
+            sub_r = sub_r.groupby(by=['mouse_id', 'correct_trial', 'context']).agg({'r': 'mean'}).reset_index()
             sub_r['seed'] = seed
             sub_r['coord'] = dest
             agg_df += [sub_r]
 
             sub_r = subgroup[(subgroup.seed.isin([seed, dest])) & (subgroup.coord.isin([seed, dest]))]
             sub_r = sub_r[sub_r.seed != sub_r.coord]
-            sub_r = sub_r.groupby(by=['mouse_id']).mean().reset_index()
+            sub_r = sub_r.groupby(by=['mouse_id', 'correct_trial', 'context']).agg({'r': 'mean'}).reset_index()
             sub_r['seed'] = dest
             sub_r['coord'] = seed
             agg_df += [sub_r]
 
     agg_df = pd.concat(agg_df)
     agg_df = agg_df.groupby(by=['mouse_id', 'correct_trial', 'coord', 'seed']).apply(lambda x: x.loc[x.context==1, 'r'].values[0] - x.loc[x.context==0, 'r'].values[0]).reset_index().rename(columns={0:'r'})
-
-    redim_df = redim_df.groupby(by=['mouse_id', 'correct_trial', 'coord', 'seed']).apply(lambda x: x.loc[x.context==1, 'r'].values[0] - x.loc[x.context==0, 'r'].values[0]).reset_index().rename(columns={0:'r'})
 
     ## Plot corrected correlation r substracted R+ - R-  with correct trials
     g = sns.catplot(
@@ -210,7 +206,7 @@ def Figure4_supp1_B_C(data, output_path):
         aspect=0.8,
         alpha=0.5)
     
-    g.map(sns.stripplot, 'coord', 'r', 'correct_trial', hue_order=[1], order=["(-1.5, 0.5)", "(-1.5, 3.5)", "(-1.5, 4.5)", "(1.5, 1.5)", "(2.5, 2.5)", "(1.5, 3.5)", "(0.5, 4.5)"], palette=['#032b22', '#da4e02'], dodge=True, alpha=0.6, ec='k', linewidth=1)
+    g.map(sns.stripplot, 'coord', 'r', 'correct_trial', hue_order=[1], order=["(-1.5, 0.5)", "(-1.5, 3.5)", "(-1.5, 4.5)", "(1.5, 1.5)", "(2.5, 2.5)", "(1.5, 3.5)", "(0.5, 4.5)"], palette=['#032b22', '#da4e02'], dodge=True, alpha=0.6, edgecolor='k', linewidth=1)
     g.set_ylabels('R- <-- r-shuffle --> R+')
     g.tick_params(axis='x', rotation=30)
     for ax in g.axes.flat:
@@ -221,8 +217,8 @@ def Figure4_supp1_B_C(data, output_path):
         for label in ax.get_xticklabels():
             label.set_horizontalalignment('right')
     g.figure.tight_layout()                
-    g.figure.savefig(os.path.join(save_path, 'Figure4_supp1_B_correct.png'))
-    g.figure.savefig(os.path.join(save_path, 'Figure4_supp1_B_correct.svg'))
+    g.figure.savefig(os.path.join(save_path, 'Figure4_supp1_C_correct.png'))
+    g.figure.savefig(os.path.join(save_path, 'Figure4_supp1_C_correct.svg'))
 
     ## Plot corrected correlation r substracted R+ - R-  with incorrect trials
 
@@ -243,7 +239,7 @@ def Figure4_supp1_B_C(data, output_path):
         aspect=0.8,
         alpha=0.5)
     
-    g.map(sns.stripplot, 'coord', 'r', 'correct_trial', hue_order=[0], order=["(-1.5, 0.5)", "(-1.5, 3.5)", "(-1.5, 4.5)", "(1.5, 1.5)", "(2.5, 2.5)", "(1.5, 3.5)", "(0.5, 4.5)"], palette=['#da4e02'], dodge=True, alpha=0.6, ec='k', linewidth=1)
+    g.map(sns.stripplot, 'coord', 'r', 'correct_trial', hue_order=[0], order=["(-1.5, 0.5)", "(-1.5, 3.5)", "(-1.5, 4.5)", "(1.5, 1.5)", "(2.5, 2.5)", "(1.5, 3.5)", "(0.5, 4.5)"], palette=['#da4e02'], dodge=True, alpha=0.6, edgecolor='k', linewidth=1)
     g.set_ylabels('R- <-- r-shuffle --> R+')
     g.tick_params(axis='x', rotation=30)
     for ax in g.axes.flat:
@@ -254,17 +250,17 @@ def Figure4_supp1_B_C(data, output_path):
         for label in ax.get_xticklabels():
             label.set_horizontalalignment('right')
     g.figure.tight_layout()
-    g.figure.savefig(os.path.join(save_path, 'Figure4_supp1_B_incorrect.png'))
-    g.figure.savefig(os.path.join(save_path, 'Figure4_supp1_B_incorrect.svg'))
+    g.figure.savefig(os.path.join(save_path, 'Figure4_supp1_C_incorrect.png'))
+    g.figure.savefig(os.path.join(save_path, 'Figure4_supp1_C_incorrect.svg'))
 
     ## compute         
-    total_avg = data.groupby(by=['opto_stim_coord', 'context', 'correct_trial', 'variable'])['value'].apply(
+    total_avg = data.groupby(by=['context', 'correct_trial', 'variable'])['value'].apply(
         lambda x: np.nanmean(np.array(x.tolist()),axis=0)).reset_index()
     total_df = []
-    group = total_avg.loc[total_avg.opto_stim_coord==stim].reset_index(drop=True)
+    group = total_avg.reset_index(drop=True)
     group['seed'] = group.apply(lambda x: x.variable.split("_")[0], axis=1)
 
-    group['masked_data'] = group.groupby(by=['opto_stim_coord', 'context', 'correct_trial', 'seed']).apply(
+    group['masked_data'] = group.groupby(by=['context', 'correct_trial', 'seed']).apply(
         lambda x: x.apply(
             lambda y: np.where(x.loc[x.variable.str.contains('sigmas'), 'value'].values[0]>=1.8, y.value, np.nan), axis=1)).reset_index()[0]
 
@@ -301,7 +297,7 @@ def Figure4_supp1_B_C(data, output_path):
                     
                 sub_r = subgroup[(subgroup.context==c) & (subgroup.seed.isin([seed, dest])) & (subgroup.coord.isin([seed, dest]))]
                 sub_r = sub_r[sub_r.seed != sub_r.coord]
-                sub_r = sub_r.groupby(by=['mouse_id']).mean().reset_index()
+                sub_r = sub_r.groupby(by=['mouse_id', 'context', 'correct_trial']).agg({'r': 'mean'}).reset_index()
                 sub_r['seed'] = seed
                 sub_r['coord'] = dest
                 sub_r['threshold'] = 0.8 if r_df_total_avg.loc[(r_df_total_avg.context==c) & (r_df_total_avg.seed.isin([seed, dest])) & (r_df_total_avg.coord.isin([seed, dest]))] ['std'].mean()>=1.8 else np.nan
@@ -309,7 +305,7 @@ def Figure4_supp1_B_C(data, output_path):
 
                 sub_r = subgroup[(subgroup.context==c) & (subgroup.seed.isin([seed, dest])) & (subgroup.coord.isin([seed, dest]))]
                 sub_r = sub_r[sub_r.seed != sub_r.coord]
-                sub_r = sub_r.groupby(by=['mouse_id']).mean().reset_index()
+                sub_r = sub_r.groupby(by=['mouse_id', 'context', 'correct_trial']).agg({'r': 'mean'}).reset_index()
                 sub_r['seed'] = dest
                 sub_r['coord'] = seed
                 sub_r['threshold'] = 0.8 if r_df_total_avg.loc[(r_df_total_avg.context==c) & (r_df_total_avg.seed.isin([seed, dest])) & (r_df_total_avg.coord.isin([seed, dest]))] ['std'].mean()>=1.8 else np.nan
@@ -338,7 +334,7 @@ def Figure4_supp1_B_C(data, output_path):
             alpha=0.5)
 
         g.map(sns.stripplot, 'r', 'coord', 'context', order=["(-1.5, 0.5)", "(-1.5, 3.5)", "(-1.5, 4.5)", "(1.5, 1.5)", "(2.5, 2.5)", "(1.5, 3.5)", "(0.5, 4.5)"], 
-                hue_order=[0, 1], palette=['purple', 'green'], dodge=True, alpha=0.6, ec='k', linewidth=1)
+                hue_order=[0, 1], palette=['purple', 'green'], dodge=True, alpha=0.6, edgecolor='k', linewidth=1)
 
         coord_order = ["(-1.5, 0.5)", "(-1.5, 3.5)", "(-1.5, 4.5)", "(1.5, 1.5)", "(2.5, 2.5)", "(1.5, 3.5)", "(0.5, 4.5)"]
         hue_order = [0, 1]
@@ -374,13 +370,12 @@ def Figure4_supp1_B_C(data, output_path):
                         fontweight="bold"
                     )
 
-        g.figure.savefig(os.path.join(save_path, f'Figure4_supp1_C_{"correct" if outcome==1 else "incorrect"}.png'))
-        g.figure.savefig(os.path.join(save_path, f'Figure4_supp1_C_{"correct" if outcome==1 else "incorrect"}.svg'))
+        g.figure.savefig(os.path.join(save_path, f'Figure4_supp1_B_{"correct" if outcome==1 else "incorrect"}.png'))
+        g.figure.savefig(os.path.join(save_path, f'Figure4_supp1_B_{"correct" if outcome==1 else "incorrect"}.svg'))
 
 
 
 def Figure4_B(total_avg, output_path):
-    from utils.wf_plotting_utils import get_wf_scalebar
     seismic_palette = sns.diverging_palette(265, 10, s=100, l=40, sep=30, n=200, center="light", as_cmap=True)
     viridis_palette = cm.get_cmap('viridis')
     color_dict = {
@@ -395,10 +390,10 @@ def Figure4_B(total_avg, output_path):
     }
 
     total_df = []
-    group = total_avg.loc[total_avg.opto_stim_coord==stim].reset_index(drop=True)
+    group = total_avg.reset_index(drop=True)
     group['seed'] = group.apply(lambda x: x.variable.split("_")[0], axis=1)
 
-    group['masked_data'] = group.groupby(by=['opto_stim_coord', 'context', 'correct_trial', 'seed']).apply(
+    group['masked_data'] = group.groupby(by=['context', 'correct_trial', 'seed']).apply(
         lambda x: x.apply(
             lambda y: np.where(x.loc[x.variable.str.contains('sigmas'), 'value'].values[0]>=1.8, y.value, np.nan), axis=1)).reset_index()[0]
 
@@ -482,12 +477,10 @@ def Figure4_B(total_avg, output_path):
                 ax.set_ylim([-3.75, 2.75])
                 ax.invert_xaxis()
 
-                save_path = os.path.join(output_path, f'{"correct" if outcome==1 else "incorrect"}')
-
                 sm = plt.cm.ScalarMappable(cmap=viridis_palette, norm=plt.Normalize(vmin=0, vmax=1))
                 fig.colorbar(sm, ax=ax, fraction=0.046, pad=0.04)
-                fig.savefig(os.path.join(save_path, f'Figure4_B_{["rewarded" if c else "non-rewarded"][0]}_{"correct" if outcome==1 else "incorrect"}.png'))
-                fig.savefig(os.path.join(save_path, f'Figure4_B_{["rewarded" if c else "non-rewarded"][0]}_{"correct" if outcome==1 else "incorrect"}.svg'))
+                fig.savefig(os.path.join(output_path, f'Figure4_B_{["rewarded" if c else "non-rewarded"][0]}_{"correct" if outcome==1 else "incorrect"}.png'))
+                fig.savefig(os.path.join(output_path, f'Figure4_B_{["rewarded" if c else "non-rewarded"][0]}_{"correct" if outcome==1 else "incorrect"}.svg'))
 
             fig, ax = plt.subplots(figsize=(4,4))
             fig.suptitle(f"{coord} stim r between rois")
@@ -527,76 +520,73 @@ def Figure4_B(total_avg, output_path):
             
             sm = plt.cm.ScalarMappable(cmap=seismic_palette, norm=plt.Normalize(vmin=0, vmax=1))
             fig.colorbar(sm, ax=ax, fraction=0.046, pad=0.04)
-            fig.savefig(os.path.join(save_path, 'Figure4_B_delta_context.png'))
-            fig.savefig(os.path.join(save_path, 'Figure4_B_delta_context.svg'))
+            fig.savefig(os.path.join(output_path, f'Figure4_B_delta_context_{outcome}.png'))
+            fig.savefig(os.path.join(output_path, f'Figure4_B_delta_context_{outcome}.svg'))
 
 
-    r_df = total_df.groupby(by=['context', 'opto_stim_coord', 'color', 'correct_trial', 'coord', 'seed', 'y_dest', 'x_dest', 'y_source', 'x_source']).apply(lambda x: np.nan_to_num(x.loc[x.variable.str.contains("_r"), 'value'].values[0]) - np.nan_to_num(x.loc[x.variable.str.contains("_shuffle_mean"), 'value'].values[0])).reset_index().rename(columns={0:'r'})
-    sigma_df = total_df.groupby(by=['context', 'opto_stim_coord', 'color', 'correct_trial', 'coord', 'seed', 'y_dest', 'x_dest', 'y_source', 'x_source']).apply(lambda x: np.nan_to_num(x.loc[x.variable.str.contains("sigma"), 'value'].values[0])).reset_index().rename(columns={0:'sigma'})
-    delta_r_df = r_df.groupby(by=['opto_stim_coord', 'context', 'color', 'coord', 'seed', 'y_dest', 'x_dest', 'y_source', 'x_source']).apply(lambda x: x.loc[x.correct_trial==1, 'r'].values[0] - x.loc[x.correct_trial==0, 'r'].values[0]).reset_index().rename(columns={0:'r'})
+    r_df = total_df.groupby(by=['context',  'color', 'correct_trial', 'coord', 'seed', 'y_dest', 'x_dest', 'y_source', 'x_source']).apply(lambda x: np.nan_to_num(x.loc[x.variable.str.contains("_r"), 'value'].values[0]) - np.nan_to_num(x.loc[x.variable.str.contains("_shuffle_mean"), 'value'].values[0])).reset_index().rename(columns={0:'r'})
+    sigma_df = total_df.groupby(by=['context', 'color', 'correct_trial', 'coord', 'seed', 'y_dest', 'x_dest', 'y_source', 'x_source']).apply(lambda x: np.nan_to_num(x.loc[x.variable.str.contains("sigma"), 'value'].values[0])).reset_index().rename(columns={0:'sigma'})
+    delta_r_df = r_df.groupby(by=[ 'context', 'color', 'coord', 'seed', 'y_dest', 'x_dest', 'y_source', 'x_source']).apply(lambda x: x.loc[x.correct_trial==1, 'r'].values[0] - x.loc[x.correct_trial==0, 'r'].values[0]).reset_index().rename(columns={0:'r'})
 
-    for coord in total_df['opto_stim_coord'].unique():
-        stats = pd.read_csv(os.path.join(output_path, [f"{coord}_stim" if 'opto' in output_path else ''][0], 'choice_pairwise_selected_rois_stats.csv'))
-        stats['norm_d'] = np.round(np.clip((stats.d_prime.values - 0.8)/(2 - 0.8), 0, 1), 2)
 
-        for c in total_df.context.unique():
-            r = r_df[(r_df.context==c) & (r_df.opto_stim_coord==coord)]
-            r = r[r.seed != coord]
-            r['norm_r'] = np.round(np.clip((r.r.values- 0.3)/(0.6 - 0.3), 0, 1), 2)
+    stats = pd.read_csv(os.path.join(output_path, 'choice_pairwise_selected_rois_stats.csv'))
+    stats['norm_d'] = np.round(np.clip((stats.d_prime.values - 0.8)/(2 - 0.8), 0, 1), 2)
 
-            sigma = sigma_df[(sigma_df.context==c) & (sigma_df.opto_stim_coord==coord)]
-            sigma = sigma[sigma.seed != coord]
+    for c in total_df.context.unique():
+        r = r_df[(r_df.context==c)]
+        r = r[r.seed != coord]
+        r['norm_r'] = np.round(np.clip((r.r.values- 0.3)/(0.6 - 0.3), 0, 1), 2)
 
-            delta = delta_r_df[(delta_r_df.context==c) & (delta_r_df.opto_stim_coord==coord)]
-            delta = delta[delta.seed != coord]
-            delta['norm_r'] = np.round(np.clip((delta.r.values- -0.05)/(0.05 - -0.05), 0, 1), 2)
+        sigma = sigma_df[(sigma_df.context==c)]
+        sigma = sigma[sigma.seed != coord]
 
-            fig, ax = plt.subplots(figsize=(4,4))
-            fig.suptitle(f"{coord} stim r between rois")
-            im=ax.scatter(delta.loc[delta.coord==delta.seed, 'x_source'], delta.loc[delta.coord==delta.seed, 'y_source'], s=200, c='black')
-            if coord != '(-5.0, 5.0)':
-                ax.scatter(eval(coord)[1], eval(coord)[0], c='gray', s=100)
+        delta = delta_r_df[(delta_r_df.context==c)]
+        delta = delta[delta.seed != coord]
+        delta['norm_r'] = np.round(np.clip((delta.r.values- -0.05)/(0.05 - -0.05), 0, 1), 2)
 
-            ax.scatter(0, 0, marker='+', c='gray', s=100)
-            iterator = zip(["(-1.5, 0.5)", "(-1.5, 3.5)", "(-1.5, 3.5)", "(-1.5, 4.5)", "(1.5, 1.5)", "(1.5, 1.5)", "(2.5, 2.5)", "(2.5, 2.5)", "(1.5, 3.5)"], 
-                            ["(1.5, 1.5)", "(-1.5, 4.5)", "(1.5, 1.5)", "(1.5, 1.5)", "(2.5, 2.5)", "(1.5, 3.5)", "(1.5, 3.5)", "(0.5, 4.5)", "(0.5, 4.5)"])
+        fig, ax = plt.subplots(figsize=(4,4))
+        fig.suptitle(f"{coord} stim r between rois")
+        im=ax.scatter(delta.loc[delta.coord==delta.seed, 'x_source'], delta.loc[delta.coord==delta.seed, 'y_source'], s=200, c='black')
+        if coord != '(-5.0, 5.0)':
+            ax.scatter(eval(coord)[1], eval(coord)[0], c='gray', s=100)
 
-            for seed, dest in iterator:
-                if seed == dest:
-                    continue
-                
-                sub_delta = delta[(delta.seed.isin([seed, dest])) & (delta.coord.isin([seed, dest]))]
-                sub_delta = sub_delta[sub_delta.seed != sub_delta.coord]
-                sub_sigma = sigma[(sigma.seed.isin([seed, dest])) & (sigma.coord.isin([seed, dest]))]
-                sub_sigma = sub_sigma[sub_sigma.seed != sub_sigma.coord]
+        ax.scatter(0, 0, marker='+', c='gray', s=100)
+        iterator = zip(["(-1.5, 0.5)", "(-1.5, 3.5)", "(-1.5, 3.5)", "(-1.5, 4.5)", "(1.5, 1.5)", "(1.5, 1.5)", "(2.5, 2.5)", "(2.5, 2.5)", "(1.5, 3.5)"],
+                        ["(1.5, 1.5)", "(-1.5, 4.5)", "(1.5, 1.5)", "(1.5, 1.5)", "(2.5, 2.5)", "(1.5, 3.5)", "(1.5, 3.5)", "(0.5, 4.5)", "(0.5, 4.5)"])
 
-                d = stats.loc[(stats.context==c) & (stats.seed==seed) & (stats.coord==dest), 'd_prime'].values[0]
-                norm_d = stats.loc[(stats.context==c) & (stats.seed==seed) & (stats.coord==dest), 'norm_d'].values[0]
-   
-                if norm_d>0:      
-                    ax.plot([sub_delta.x_source.unique(), sub_delta.x_dest.unique()], [sub_delta.y_source.unique(), sub_delta.y_dest.unique()], 
-                            c=seismic_palette(sub_delta.norm_r.mean()), linewidth=d*2)  
-                else:
-                    ax.plot([sub_delta.x_source.unique(), sub_delta.x_dest.unique()], [sub_delta.y_source.unique(), sub_delta.y_dest.unique()], 
-                            c='gray', linewidth=1)  
-            ax.grid(True)
-            ax.set_xticks(np.linspace(0.5,5.5,6))
-            ax.set_xlim([-0.25, 6])
-            ax.set_yticks(np.linspace(-3.5, 2.5,7))
-            ax.set_ylim([-3.75, 2.75])
-            ax.invert_xaxis()
+        for seed, dest in iterator:
+            if seed == dest:
+                continue
 
-            save_path = os.path.join(output_path, f'{"rewarded" if c==1 else "non-rewarded"}')
-            
-            sm = plt.cm.ScalarMappable(cmap=seismic_palette, norm=plt.Normalize(vmin=0, vmax=1))
-            fig.colorbar(sm, ax=ax, fraction=0.046, pad=0.04)
-            fig.savefig(os.path.join(save_path, 'Figure4_B_delta_choice.png'))
-            fig.savefig(os.path.join(save_path, 'Figure4_B_delta_choice.png'))
+            sub_delta = delta[(delta.seed.isin([seed, dest])) & (delta.coord.isin([seed, dest]))]
+            sub_delta = sub_delta[sub_delta.seed != sub_delta.coord]
+            sub_sigma = sigma[(sigma.seed.isin([seed, dest])) & (sigma.coord.isin([seed, dest]))]
+            sub_sigma = sub_sigma[sub_sigma.seed != sub_sigma.coord]
+
+            d = stats.loc[(stats.context==c) & (stats.seed==seed) & (stats.coord==dest), 'd_prime'].values[0]
+            norm_d = stats.loc[(stats.context==c) & (stats.seed==seed) & (stats.coord==dest), 'norm_d'].values[0]
+
+            if norm_d>0:
+                ax.plot([sub_delta.x_source.unique(), sub_delta.x_dest.unique()], [sub_delta.y_source.unique(), sub_delta.y_dest.unique()],
+                        c=seismic_palette(sub_delta.norm_r.mean()), linewidth=d*2)
+            else:
+                ax.plot([sub_delta.x_source.unique(), sub_delta.x_dest.unique()], [sub_delta.y_source.unique(), sub_delta.y_dest.unique()],
+                        c='gray', linewidth=1)
+        ax.grid(True)
+        ax.set_xticks(np.linspace(0.5,5.5,6))
+        ax.set_xlim([-0.25, 6])
+        ax.set_yticks(np.linspace(-3.5, 2.5,7))
+        ax.set_ylim([-3.75, 2.75])
+        ax.invert_xaxis()
+
+        sm = plt.cm.ScalarMappable(cmap=seismic_palette, norm=plt.Normalize(vmin=0, vmax=1))
+        fig.colorbar(sm, ax=ax, fraction=0.046, pad=0.04)
+        fig.savefig(os.path.join(output_path, f'Figure4_B_delta_choice_{c}.png'))
+        fig.savefig(os.path.join(output_path, f'Figure4_B_delta_choice_{c}.png'))
 
 
 
 def compute_stats_barplot_context(df, output_path):
-    from scipy.stats import ttest_ind
     df=df[df.coord!='(2.5, 5.5)']
     all_rois_stats =[]
     for name, group in df.groupby(by=['correct_trial', 'seed', 'coord']):
@@ -631,7 +621,11 @@ def compute_stats_barplot_context(df, output_path):
 
     all_rois_stats_correct_vs_incorrect =[]
     for name, group in df.groupby(by=['seed', 'coord']):
-        context_diff = group.groupby(by=['mouse_id', 'correct_trial']).apply(lambda x: x.loc[x.context==1, 'r'].to_numpy() - x.loc[x.context==0, 'r'].to_numpy()).reset_index().rename(columns={0:'r'})
+        context_diff = group.groupby(by=['mouse_id', 'correct_trial']).apply(
+            lambda x: float(np.mean(
+                x.loc[x.context == 1, 'r'].to_numpy() - x.loc[x.context == 0, 'r'].to_numpy()
+            ))
+        ).reset_index().rename(columns={0: 'r'})
         t, p = ttest_rel(context_diff.loc[context_diff.correct_trial==1, 'r'], context_diff.loc[context_diff.correct_trial==0, 'r'])
         mean_diff = (context_diff.loc[context_diff.correct_trial==1, 'r'].mean() - context_diff.loc[context_diff.correct_trial==0, 'r'].mean())
         std_diff = np.std(context_diff.loc[context_diff.correct_trial==1, 'r'].to_numpy() - context_diff.loc[context_diff.correct_trial==0, 'r'].to_numpy())
@@ -691,7 +685,14 @@ def compute_stats_barplot_context(df, output_path):
 
     selected_rois_stats_correct_vs_incorrect =[]
     for name, group in df.loc[df.coord.isin(df.seed.unique())].groupby(by=['seed', 'coord']):
-        context_diff = group.groupby(by=['mouse_id', 'correct_trial']).apply(lambda x: x.loc[x.context==1, 'r'].to_numpy() - x.loc[x.context==0, 'r'].to_numpy()).reset_index().rename(columns={0:'r'})
+        context_diff = (
+            group.groupby(by=['mouse_id', 'correct_trial'])
+            .apply(lambda x: (
+                    x.loc[x.context == 1, 'r'].to_numpy() - x.loc[x.context == 0, 'r'].to_numpy()
+            ).item(), include_groups=False)
+            .reset_index()
+            .rename(columns={0: 'r'})
+        )
         t, p = ttest_rel(context_diff.loc[context_diff.correct_trial==1, 'r'], context_diff.loc[context_diff.correct_trial==0, 'r'])
         mean_diff = (context_diff.loc[context_diff.correct_trial==1, 'r'].mean() - context_diff.loc[context_diff.correct_trial==0, 'r'].mean())
         std_diff = np.std(context_diff.loc[context_diff.correct_trial==1, 'r'].to_numpy() - context_diff.loc[context_diff.correct_trial==0, 'r'].to_numpy())
@@ -720,42 +721,26 @@ def compute_stats_barplot_context(df, output_path):
 
 def compute_stats_barplot_choice(mouse_avg, output_path):
 
-    group = mouse_avg.loc[mouse_avg.opto_stim_coord=='(-5.0, 5.0)']
-
-    redim_df = []
-    for i, row in group.iterrows():
-        redim, coords = reduce_im_dimensions(row['value'][np.newaxis])
-        df = generate_reduced_image_df(redim, coords)
-        df['context'] = row.context
-        df['mouse_id'] = row.mouse_id
-        df['correct_trial'] = row.correct_trial
-        df['variable'] = row.variable
-        redim_df+=[df]
-        
-    redim_df = pd.concat(redim_df).rename(columns={'dff0': 'value'})
-
-    redim_df['seed'] = redim_df.apply(lambda x: x.variable.split("_")[0], axis=1)
-    redim_df['coord_order'] = redim_df.apply(lambda x: f"({x.y}, {x.x})", axis=1)
-    redim_df = redim_df.groupby(by=['mouse_id', 'context', 'correct_trial', 'coord_order', 'seed']).apply(lambda x: np.nan_to_num(x.loc[x.variable.str.contains("_r"), 'value'].values[0]) - np.nan_to_num(x.loc[x.variable.str.contains("_shuffle_mean"), 'value'].values[0])).reset_index().rename(columns={0:'r', 'coord_order': 'coord'})
-    
     save_path = os.path.join(output_path)
     if not os.path.exists(save_path):
         os.makedirs(save_path)
-    
-    df=redim_df[~redim_df.coord.isin(['(1.5, 4.5)', '(2.5, 4.5)', '(2.5, 5.5)'])]
-    all_rois_stats =[]
+
+    df = mouse_avg[~mouse_avg.coord.isin(['(1.5, 4.5)', '(2.5, 4.5)', '(2.5, 5.5)'])]
+    all_rois_stats = []
     for name, group in df.groupby(by=['context', 'seed', 'coord']):
-        t, p = ttest_rel(group.loc[group.correct_trial==1, 'r'].to_numpy(), group.loc[group.correct_trial==0, 'r'].to_numpy())
-        mean_diff = (group.loc[group.correct_trial==1, 'r'].mean() - group.loc[group.correct_trial==0, 'r'].mean())
-        std_diff = np.std(group.loc[group.correct_trial==1, 'r'].to_numpy() - group.loc[group.correct_trial==0, 'r'].to_numpy())
+        t, p = ttest_rel(group.loc[group.correct_trial == 1, 'r'].to_numpy(),
+                         group.loc[group.correct_trial == 0, 'r'].to_numpy())
+        mean_diff = (group.loc[group.correct_trial == 1, 'r'].mean() - group.loc[group.correct_trial == 0, 'r'].mean())
+        std_diff = np.std(
+            group.loc[group.correct_trial == 1, 'r'].to_numpy() - group.loc[group.correct_trial == 0, 'r'].to_numpy())
 
         results = {
-         'context': name[0],
-         'seed': name[1],
-         'coord': name[2],
-         'dof': group.mouse_id.unique().shape[0]-1,
-         'mean_rew': group.loc[group.correct_trial==1, 'r'].mean(),
-         'std_rew': group.loc[group.correct_trial==1, 'r'].std(),
+            'context': name[0],
+            'seed': name[1],
+            'coord': name[2],
+            'dof': group.mouse_id.unique().shape[0] - 1,
+            'mean_rew': group.loc[group.correct_trial == 1, 'r'].mean(),
+            'std_rew': group.loc[group.correct_trial == 1, 'r'].std(),
          'mean_no_rew': group.loc[group.correct_trial==0, 'r'].mean(),
          'std_no_rew': group.loc[group.correct_trial==0, 'r'].std(),
          't': t,
@@ -773,7 +758,9 @@ def compute_stats_barplot_choice(mouse_avg, output_path):
 
     all_rois_stats_rew_vs_norew =[]
     for name, group in df.groupby(by=['seed', 'coord']):
-        choice_diff = group.groupby(by=['mouse_id', 'context']).apply(lambda x: x.loc[x.correct_trial==1, 'r'].to_numpy() - x.loc[x.correct_trial==0, 'r'].to_numpy()).reset_index().rename(columns={0:'r'})
+        choice_diff = group.groupby(by=['mouse_id', 'context']).apply(
+            lambda x: (x.loc[x.correct_trial == 1, 'r'].to_numpy() - x.loc[x.correct_trial == 0, 'r'].to_numpy()).item()
+        ).reset_index().rename(columns={0: 'r'})
         t, p = ttest_rel(choice_diff.loc[choice_diff.context==1, 'r'].to_numpy(), choice_diff.loc[choice_diff.context==0, 'r'].to_numpy())
         mean_diff = choice_diff.loc[choice_diff.context==1, 'r'].mean() - choice_diff.loc[choice_diff.context==0, 'r'].mean()
         std_diff = np.std(choice_diff.loc[choice_diff.context==1, 'r'].to_numpy() - choice_diff.loc[choice_diff.context==0, 'r'].to_numpy())
@@ -830,7 +817,14 @@ def compute_stats_barplot_choice(mouse_avg, output_path):
 
     selected_rois_stats_rew_vs_norew =[]
     for name, group in df.loc[df.coord.isin(df.seed.unique())].groupby(by=['seed', 'coord']):
-        choice_diff = group.groupby(by=['mouse_id', 'context']).apply(lambda x: x.loc[x.correct_trial==1, 'r'].to_numpy() - x.loc[x.correct_trial==0, 'r'].to_numpy()).reset_index().rename(columns={0:'r'})
+        choice_diff = (
+            group.groupby(by=['mouse_id', 'context'])
+            .apply(lambda x: (
+                    x.loc[x.correct_trial == 1, 'r'].to_numpy() - x.loc[x.correct_trial == 0, 'r'].to_numpy()
+            ).item(), include_groups=False)
+            .reset_index()
+            .rename(columns={0: 'r'})
+        )
         t, p = ttest_rel(choice_diff.loc[choice_diff.context==1, 'r'].to_numpy(), choice_diff.loc[choice_diff.context==0, 'r'].to_numpy())
         mean_diff = choice_diff.loc[choice_diff.context==1, 'r'].mean() - choice_diff.loc[choice_diff.context==0, 'r'].mean()
         std_diff = np.std(choice_diff.loc[choice_diff.context==1, 'r'].to_numpy() - choice_diff.loc[choice_diff.context==0, 'r'].to_numpy())
@@ -863,23 +857,22 @@ def main(data, output_path):
         os.makedirs(os.path.join(output_path, 'figure4A_B'))
         os.makedirs(os.path.join(output_path, 'figure4_supp1'))
 
-    data['opto_stim_coord'] = '(-5.0, 5.0)'
     data.value = data.apply(lambda x: x.value[0] if 'percentile' not in x.variable else x.value, axis=1)
-    mouse_avg = data.groupby(by=['mouse_id', 'opto_stim_coord', 'context', 'correct_trial', 'variable'])['value'].apply(
+    mouse_avg = data.groupby(by=['mouse_id',  'context', 'correct_trial', 'variable'])['value'].apply(
         lambda x: np.nanmean(np.array(x.tolist()),axis=0)).reset_index()
     mouse_avg['value'] = mouse_avg['value'].apply(lambda x: np.array(x).reshape(125, -1))
 
-    total_avg = mouse_avg.groupby(by=['opto_stim_coord', 'context', 'correct_trial', 'variable'])['value'].apply(
+    total_avg = mouse_avg.groupby(by=['context', 'correct_trial', 'variable'])['value'].apply(
         lambda x: np.nanmean(np.array(x.tolist()),axis=0)).reset_index()
 
     # plot total avg
-    for roi in ['(-1.5, 0.5)', '(-1.5, 3.5)', '(-1.5, 4.5)', '(1.5, 3.5)', '(0.5, 4.5)', '(1.5, 1.5)', '(2.5, 2.5)']:
-
-        print(f"Plotting total averages for roi {roi}")
-        save_path = os.path.join(output_path, 'figure4_supp1', 'figure4_supp1_A', roi)
-        if not os.path.exists(save_path):
-            os.makedirs(save_path)
-        Figure4_supp1_A(total_avg.loc[total_avg.correct_trial==1], roi, save_path)
+    # for roi in ['(-1.5, 0.5)', '(-1.5, 3.5)', '(-1.5, 4.5)', '(1.5, 3.5)', '(0.5, 4.5)', '(1.5, 1.5)', '(2.5, 2.5)']:
+    #
+    #     print(f"Plotting total averages for roi {roi}")
+    #     save_path = os.path.join(output_path, 'figure4_supp1', 'figure4_supp1_A', roi)
+    #     if not os.path.exists(save_path):
+    #         os.makedirs(save_path)
+    #     Figure4_supp1_A(total_avg.loc[total_avg.correct_trial==1], roi, save_path)
 
     Figure4_supp1_B_C(mouse_avg, output_path)
     Figure4_B(total_avg, os.path.join(output_path, 'figure4A_B'))

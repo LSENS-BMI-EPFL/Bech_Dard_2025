@@ -65,7 +65,7 @@ def load_opto_data(opto_result_path):
     
 def Figure4C(data_path, result_path):
 
-    avg = np.load(data_path, allow_pickle=True).item()
+    avg = pd.read_pickle(data_path)
 
     for c, group in avg.groupby('context'):
         for loc in ["(-5.0, 5.0)", "(-1.5, 3.5)", "(1.5, 1.5)", "(-1.0, 0.5)",]:
@@ -76,32 +76,41 @@ def Figure4C(data_path, result_path):
                 os.makedirs(save_path)
 
             for i in range(9, 16):
-                fig, ax = plt.subplots()
-                plot_wf_single_frame(im_seq[i], f"Frame {i-10}", facecolor=None, edgecolor=None, fig=fig, ax=ax, norm=True, colormap='hotcold', vmin=-0.03, vmax=0.03)
+                fig, ax0 = plt.subplots(1, 1)
+                frame = im_seq[:, i]
+                if frame.ndim == 1:
+                    frame = frame.reshape(125, -1)
+                plot_wf_single_frame(frame, f"Frame {i-10}", figure=fig, ax_to_plot=ax0, colormap='hotcold', vmin=-0.03, vmax=0.03, saving_path='', save_formats=[], suptitle='')
                 fig.savefig(os.path.join(save_path, f'whisker_stim_frame_{i-10}.png'))
 
 
 def Figure4_supp2_A(data_path, result_path): 
 
-    avg = np.load(data_path, allow_pickle=True).item()
+    avg = pd.read_pickle(data_path)
 
     for loc in ["(-1.5, 3.5)", "(1.5, 1.5)"]:
-        print(c, loc)
+        print(loc)
         im_seq = avg.loc[(avg.trial_type=='whisker_trial') & (avg.opto_stim_coord==loc), 'wf_image_sub'].to_numpy()[0]
         save_path = os.path.join(result_path, 'Figure4_supp2_images', f"{loc}_stim")
         if not os.path.exists(save_path):
             os.makedirs(save_path)
 
         for i in range(9, 16):
-            fig, ax = plt.subplots()
-            plot_wf_single_frame(im_seq[i], f"Frame {i-10}", facecolor=None, edgecolor=None, fig=fig, ax=ax, norm=True, colormap='hotcold', vmin=-0.03, vmax=0.03)
+            fig, ax0 = plt.subplots()
+            frame = im_seq[:, i]
+            if frame.ndim == 1:
+                frame = frame.reshape(125, -1)
+            plot_wf_single_frame(frame, f"Frame {i-10}",  figure=fig, ax_to_plot=ax0, colormap='hotcold', vmin=-0.03, vmax=0.03, saving_path='', save_formats=[], suptitle='')
             fig.savefig(os.path.join(save_path, f'whisker_stim_frame_{i-10}.png'))
 
-        im_seq = group.loc[(group.trial_type=='no_stim_trial') & (group.opto_stim_coord==loc), 'wf_image_sub'].to_numpy()[0]
+        im_seq = avg.loc[(avg.trial_type=='no_stim_trial') & (avg.opto_stim_coord==loc), 'wf_image_sub'].to_numpy()[0]
 
         for i in range(9, 16):
-            fig, ax = plt.subplots()
-            plot_wf_single_frame(im_seq[i], f"Frame {i-10}", facecolor=None, edgecolor=None, fig=fig, ax=ax, norm=True, colormap='hotcold', vmin=-0.03, vmax=0.03)
+            fig, ax0 = plt.subplots()
+            frame = im_seq[:, i]
+            if frame.ndim == 1:
+                frame = frame.reshape(125, -1)
+            plot_wf_single_frame(frame, f"Frame {i-10}",  figure=fig, ax_to_plot=ax0,  colormap='hotcold', vmin=-0.03, vmax=0.03, saving_path='', save_formats=[], suptitle='')
             fig.savefig(os.path.join(save_path, f'no_stim_frame_{i-10}.png'))
 
 
@@ -516,11 +525,11 @@ def Figure4_DG_supp2_BD(data_path, opto_data_path, output_path):
 
 def main(data_path_4C, data_path_4DG, data_path_4_supp, opto_data_path, output_path):
 
-    if not os.path.exitst(os.path.join(output_path, 'figure4C_G')):
-        os.makedirs(os.path.join(output_path, 'figureC_G'))
-        os.makedirs(os.path.join(output_path, 'figure4_supp2'))
+    if not os.path.exists(os.path.join(output_path, 'figure4C_G')):
+        os.makedirs(os.path.join(output_path, 'figureC_G'), exist_ok=True)
+        os.makedirs(os.path.join(output_path, 'figure4_supp2'), exist_ok=True)
 
     Figure4C(data_path_4C, os.path.join(output_path, 'figure4C_G'))
-    Figure4_supp2_A(data_path_4_supp, os.path.join(output_path, 'figure4_supp2'))
+    Figure4_supp2_A(data_path_4_supp, os.path.join(output_path, 'figure4_supp2', '2A'))
 
     Figure4_DG_supp2_BD(data_path=data_path_4DG, opto_data_path=opto_data_path, output_path=output_path)
