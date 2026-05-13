@@ -68,7 +68,7 @@ def Figure4C(data_path, result_path):
     avg = pd.read_pickle(data_path)
 
     for c, group in avg.groupby('context'):
-        for loc in ["(-5.0, 5.0)", "(-1.5, 3.5)", "(1.5, 1.5)", "(-1.0, 0.5)",]:
+        for loc in ["(-5.0, 5.0)", "(-1.5, 3.5)", "(1.5, 1.5)", "(-1.5, 0.5)",]:
             print(c, loc)
             im_seq = group.loc[(group.trial_type=='whisker_trial') & (group.opto_stim_coord==loc), 'wf_image_sub'].to_numpy()[0]
             save_path = os.path.join(result_path, 'Figure4C_images', 'rewarded' if c else 'non-rewarded', f"{loc}_stim")
