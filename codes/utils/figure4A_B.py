@@ -53,16 +53,16 @@ def Figure4_supp1_A(df, roi, save_path, vmin=-0.1, vmax=0.1):
     
     # fig, ax = plt.subplots(1, 3, figsize=(8, 4))
     # fig.suptitle(f"{roi} block average")
-    # plot_single_frame(total_avg.loc[(total_avg.context == 1) & (total_avg.variable == f"{roi}_r"), 'value'].values[0],
-    #                     title='Rewarded',
+    # plot_wf_single_frame(total_avg.loc[(total_avg.context == 1) & (total_avg.variable == f"{roi}_r"), 'value'].values[0],
+    #                     title='Rewarded', facecolor=None, edgecolor=None,
     #                     colormap='viridis', vmin=0.3, vmax=0.6, norm=False, fig=fig, ax=ax[0])
-    # plot_single_frame(total_avg.loc[(total_avg.context == 0) & (total_avg.variable == f"{roi}_r"), 'value'].values[0],
-    #                     title='Non-Rewarded',
+    # plot_wf_single_frame(total_avg.loc[(total_avg.context == 0) & (total_avg.variable == f"{roi}_r"), 'value'].values[0],
+    #                     title='Non-Rewarded', facecolor=None, edgecolor=None,
     #                     colormap='viridis', vmin=0.3, vmax=0.6, norm=False, fig=fig, ax=ax[1])
     # im = total_avg.loc[(total_avg.context == 1) & (total_avg.variable == f"{roi}_r"), 'value'].values[0] - \
     #         total_avg.loc[(total_avg.context == 0) & (total_avg.variable == f"{roi}_r"), 'value'].values[0]
 
-    # plot_single_frame(im, title='R+ - R-',
+    # plot_siplot_wf_single_framengle_frame(im, title='R+ - R-', facecolor=None, edgecolor=None,
     #                     colormap=seismic_palette, vmin=vmin, vmax=vmax, norm=False, fig=fig, ax=ax[2])
     # fig.savefig(os.path.join(save_path, f"{roi}_r.png"))
 
@@ -74,14 +74,14 @@ def Figure4_supp1_A(df, roi, save_path, vmin=-0.1, vmax=0.1):
     im_nor = total_avg.loc[(total_avg.context == 0) & (total_avg.variable == f'{roi}_r'), 'value'].values[0] - \
             total_avg.loc[(total_avg.context == 0) & (total_avg.variable == f'{roi}_shuffle_mean'), 'value'].values[0]
 
-    plot_single_frame(im_r,
-                        title='Rewarded',
+    plot_wf_single_frame(im_r,
+                        title='Rewarded', facecolor=None, edgecolor=None,
                         colormap='viridis', vmin=0.3, vmax=0.6, norm=False, fig=fig, ax=ax[0])
-    plot_single_frame(im_nor,
-                        title='Non-Rewarded',
+    plot_wf_single_frame(im_nor,
+                        title='Non-Rewarded', facecolor=None, edgecolor=None,
                         colormap='viridis', vmin=0.3, vmax=0.6, norm=False, fig=fig, ax=ax[1])
 
-    plot_single_frame(im_r - im_nor, title='R+ - R-',
+    plot_wf_single_frame(im_r - im_nor, title='R+ - R-', facecolor=None, edgecolor=None,
                         colormap=seismic_palette, vmin=vmin, vmax=vmax, norm=False, fig=fig, ax=ax[2])
     fig.savefig(os.path.join(save_path, f"{roi}_shuffle_avg.png"))
 
@@ -90,16 +90,16 @@ def Figure4_supp1_A(df, roi, save_path, vmin=-0.1, vmax=0.1):
 
     fig, ax = plt.subplots(1, 3, figsize=(8, 4))
     fig.suptitle(f"{roi} block average")
-    plot_single_frame(total_avg.loc[(total_avg.context == 1) & (total_avg.variable == f"{roi}_nsigmas"), 'value'].values[0],
-                        title='Rewarded',
+    plot_wf_single_frame(total_avg.loc[(total_avg.context == 1) & (total_avg.variable == f"{roi}_nsigmas"), 'value'].values[0],
+                        title='Rewarded', facecolor=None, edgecolor=None,
                         colormap=dprime_palette, vmin=1.8, vmax=3, norm=False, fig=fig, ax=ax[0])
-    plot_single_frame(total_avg.loc[(total_avg.context == 0) & (total_avg.variable == f"{roi}_nsigmas"), 'value'].values[0],
-                        title='Non-Rewarded',
+    plot_wf_single_frame(total_avg.loc[(total_avg.context == 0) & (total_avg.variable == f"{roi}_nsigmas"), 'value'].values[0],
+                        title='Non-Rewarded', facecolor=None, edgecolor=None,
                         colormap=dprime_palette, vmin=1.8, vmax=3, norm=False, fig=fig, ax=ax[1])
     im = total_avg.loc[(total_avg.context == 1) & (total_avg.variable == f"{roi}_nsigmas"), 'value'].values[0] - \
             total_avg.loc[(total_avg.context == 0) & (total_avg.variable == f"{roi}_nsigmas"), 'value'].values[0]
 
-    plot_single_frame(im, title='R+ - R-',
+    plot_wf_single_frame(im, title='R+ - R-', facecolor=None, edgecolor=None,
                         colormap=seismic_palette, vmin=-0.3, vmax=0.3, norm=False, fig=fig, ax=ax[2])
     fig.savefig(os.path.join(save_path, f"{roi}_shuffle_nsigmas.png"))
 
@@ -107,16 +107,16 @@ def Figure4_supp1_A(df, roi, save_path, vmin=-0.1, vmax=0.1):
     mask_non_r = np.where(total_avg.loc[(total_avg.context == 0) & (total_avg.variable == f"{roi}_nsigmas"), 'value'].values[0]>=1.8, im_nor, np.nan)
     fig, ax = plt.subplots(1, 3, figsize=(8, 4))
     fig.suptitle(f"{roi} block average")
-    plot_single_frame(mask_r,
-                        title='Rewarded',
+    plot_wf_single_frame(mask_r,
+                        title='Rewarded', facecolor=None, edgecolor=None,
                         colormap='viridis', vmin=0.3, vmax=0.6, norm=False, fig=fig, ax=ax[0])
-    plot_single_frame(mask_non_r,
-                        title='Non-Rewarded',
+    plot_wf_single_frame(mask_non_r,
+                        title='Non-Rewarded', facecolor=None, edgecolor=None,
                         colormap='viridis', vmin=0.3, vmax=0.6, norm=False, fig=fig, ax=ax[1])
     im = total_avg.loc[(total_avg.context == 1) & (total_avg.variable == f"{roi}_nsigmas"), 'value'].values[0] - \
             total_avg.loc[(total_avg.context == 0) & (total_avg.variable == f"{roi}_nsigmas"), 'value'].values[0]
 
-    plot_single_frame(mask_r-mask_non_r, title='R+ - R-',
+    plot_wf_single_frame(mask_r-mask_non_r, title='R+ - R-', facecolor=None, edgecolor=None,
                         colormap=seismic_palette, vmin=-0.1, vmax=0.1, norm=False, fig=fig, ax=ax[2])
     fig.savefig(os.path.join(save_path, f"{roi}_significant_pairs.png"))
 

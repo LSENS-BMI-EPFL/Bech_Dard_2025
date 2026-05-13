@@ -386,7 +386,7 @@ def Figure4_supp2_BC(pca, result_path):
     for i in range(3):
         im_pca = generate_reduced_image_df(coeff[np.newaxis, :, i], [eval(label) for label in labels])
         im_pca.drop(im_pca[(im_pca.x==5.5)&(im_pca.y==2.5)].index, inplace=True)        
-        plot_grid_on_allen(im_pca, outcome='dff0', palette='seismic', facecolor=[], edgecolor=[], result_path=None, dotsize=340, vmin=-im_pca.dff0.abs().max(), vmax=im_pca.dff0.abs().max(), norm=None, fig=fig, ax= ax.flat[i])
+        plot_grid_on_allen(im_pca, outcome='dff0', palette='seismic', facecolor=None, edgecolor=None, result_path=None, dotsize=340, vmin=-im_pca.dff0.abs().max(), vmax=im_pca.dff0.abs().max(), norm=None, fig=fig, ax= ax.flat[i])
         ax.flat[i].set_axis_off()
         ax.flat[i].set_title(f"PC {i+1}")
     fig.savefig(os.path.join(result_path, f"Figure4_supp2_C.png"))
