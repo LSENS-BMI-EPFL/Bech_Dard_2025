@@ -109,7 +109,6 @@ def Figure4_supp2_A(data_path, result_path):
     for loc in ["(-1.5, 3.5)", "(1.5, 1.5)"]:
         print(loc)
         im_seq = avg.loc[(avg.context==1) & (avg.trial_type=='whisker_trial') & (avg.opto_stim_coord==loc), 'wf_image_sub'].to_numpy()[0]
-        # im_seq = avg.loc[(avg.opto_stim_coord==loc), 'wf_image_sub'].to_numpy()[0]
         save_path = os.path.join(result_path, 'Figure4_supp2_images', f"{name_dict[loc]}_stim")
         if not os.path.exists(save_path):
             os.makedirs(save_path)
