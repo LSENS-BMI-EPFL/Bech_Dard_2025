@@ -38,7 +38,8 @@ def plot_wf_single_frame(frame, title, figure, ax_to_plot, suptitle, saving_path
     bregma = (488, 290)
     scale = 4
     scalebar = get_wf_scalebar(scale=scale)
-    iso_mask, atlas_mask, allen_bregma = get_allen_ccf(bregma)
+    iso_mask, atlas_mask, allen_bregma = get_allen_ccf(bregma, root=os.path.join(os.path.abspath(os.path.join(os.getcwd())),
+                                    'data', 'utils', 'Allen_brain'))
     cmap = get_colormap(colormap)
     cmap.set_bad(color=nan_c)
 

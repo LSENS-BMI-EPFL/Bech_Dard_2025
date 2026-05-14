@@ -65,53 +65,62 @@ def load_opto_data(opto_result_path):
     
 def Figure4C(data_path, result_path):
 
+    name_dict={
+        "(-5.0, 5.0)": 'Control', 
+        "(-1.5, 3.5)": 'wS1', 
+        "(1.5, 1.5)": 'wM1',
+        "(-1.5, 0.5)": 'RSC'
+    }
     avg = pd.read_pickle(data_path)
 
     for c, group in avg.groupby('context'):
-        for loc in ["(-5.0, 5.0)", "(-1.5, 3.5)", "(1.5, 1.5)", "(-1.5, 0.5)",]:
+        if c==1:
+            loc_list = ["(-5.0, 5.0)", "(-1.5, 3.5)", "(1.5, 1.5)"]
+        else:
+            loc_list = ["(-1.5, 0.5)"]
+
+        for loc in loc_list:
             print(c, loc)
             im_seq = group.loc[(group.trial_type=='whisker_trial') & (group.opto_stim_coord==loc), 'wf_image_sub'].to_numpy()[0]
-            save_path = os.path.join(result_path, 'Figure4C_images', 'rewarded' if c else 'non-rewarded', f"{loc}_stim")
+            save_path = os.path.join(result_path, 'Figure4C_images', f"{name_dict[loc]}_stim")
             if not os.path.exists(save_path):
                 os.makedirs(save_path)
 
             for i in range(9, 16):
                 fig, ax0 = plt.subplots(1, 1)
-                frame = im_seq[:, i]
+                frame = im_seq[i]
                 if frame.ndim == 1:
                     frame = frame.reshape(125, -1)
-                plot_wf_single_frame(frame, f"Frame {i-10}", figure=fig, ax_to_plot=ax0, colormap='hotcold', vmin=-0.03, vmax=0.03, saving_path='', save_formats=[], suptitle='')
-                fig.savefig(os.path.join(save_path, f'whisker_stim_frame_{i-10}.png'))
+                plot_wf_single_frame(frame, f"{(i-10)*20}ms", figure=fig, ax_to_plot=ax0, colormap='hotcold', vmin=-0.03, vmax=0.03, saving_path='', save_formats=[], suptitle='')
+                fig.savefig(os.path.join(save_path, f'whisker_stim_frame_{(i-10)*20}.png'))
 
 
 def Figure4_supp2_A(data_path, result_path): 
+
+    name_dict={
+        "(-5.0, 5.0)": 'Control', 
+        "(-1.5, 3.5)": 'wS1', 
+        "(1.5, 1.5)": 'wM1',
+        "(-1.5, 0.5)": 'RSC'
+    }
 
     avg = pd.read_pickle(data_path)
 
     for loc in ["(-1.5, 3.5)", "(1.5, 1.5)"]:
         print(loc)
-        im_seq = avg.loc[(avg.trial_type=='whisker_trial') & (avg.opto_stim_coord==loc), 'wf_image_sub'].to_numpy()[0]
-        save_path = os.path.join(result_path, 'Figure4_supp2_images', f"{loc}_stim")
+        im_seq = avg.loc[(avg.context==1) & (avg.trial_type=='whisker_trial') & (avg.opto_stim_coord==loc), 'wf_image_sub'].to_numpy()[0]
+        # im_seq = avg.loc[(avg.opto_stim_coord==loc), 'wf_image_sub'].to_numpy()[0]
+        save_path = os.path.join(result_path, 'Figure4_supp2_images', f"{name_dict[loc]}_stim")
         if not os.path.exists(save_path):
             os.makedirs(save_path)
 
         for i in range(9, 16):
             fig, ax0 = plt.subplots()
-            frame = im_seq[:, i]
+            frame = im_seq[i]
             if frame.ndim == 1:
                 frame = frame.reshape(125, -1)
-            plot_wf_single_frame(frame, f"Frame {i-10}",  figure=fig, ax_to_plot=ax0, colormap='hotcold', vmin=-0.03, vmax=0.03, saving_path='', save_formats=[], suptitle='')
-            fig.savefig(os.path.join(save_path, f'whisker_stim_frame_{i-10}.png'))
-
-        im_seq = avg.loc[(avg.trial_type=='no_stim_trial') & (avg.opto_stim_coord==loc), 'wf_image_sub'].to_numpy()[0]
-
-        for i in range(9, 16):
-            fig, ax0 = plt.subplots()
-            frame = im_seq[:, i]
-            if frame.ndim == 1:
-                frame = frame.reshape(125, -1)
-            plot_wf_single_frame(frame, f"Frame {i-10}",  figure=fig, ax_to_plot=ax0,  colormap='hotcold', vmin=-0.03, vmax=0.03, saving_path='', save_formats=[], suptitle='')
-            fig.savefig(os.path.join(save_path, f'no_stim_frame_{i-10}.png'))
+            plot_wf_single_frame(frame, f"{(i-10)*20}ms",  figure=fig, ax_to_plot=ax0, colormap='hotcold', vmin=-0.03, vmax=0.03, saving_path='', save_formats=[], suptitle='')
+            fig.savefig(os.path.join(save_path, f'whisker_stim_frame_{(i-10)*20}.png'))
 
 
 def Figure4_D_Figure4_supp2_D(control_df, pc_df, result_path):

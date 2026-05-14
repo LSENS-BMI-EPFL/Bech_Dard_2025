@@ -582,7 +582,7 @@ def Figure4_B(total_avg, output_path):
         sm = plt.cm.ScalarMappable(cmap=seismic_palette, norm=plt.Normalize(vmin=0, vmax=1))
         fig.colorbar(sm, ax=ax, fraction=0.046, pad=0.04)
         fig.savefig(os.path.join(output_path, f'Figure4_B_delta_choice_{c}.png'))
-        fig.savefig(os.path.join(output_path, f'Figure4_B_delta_choice_{c}.png'))
+        fig.savefig(os.path.join(output_path, f'Figure4_B_delta_choice_{c}.svg'))
 
 
 
