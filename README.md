@@ -9,7 +9,7 @@ Intermediate dataset can be downloaded from [zenodo](zenodo) or generated starti
 
 ```bash
 cd path/to/Bech_Dard_plot_figures
-conda env create -f bech_dard_environment.yml
+conda env create -f bech_dard_plot_environment.yml
 conda activate bech_dard_plot
 ```
 
