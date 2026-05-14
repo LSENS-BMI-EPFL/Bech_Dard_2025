@@ -1,4 +1,6 @@
 ﻿import os
+import gc
+gc.collect()
 import pandas as pd
 from codes.utils import figure1_supp
 

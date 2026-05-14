@@ -72,5 +72,4 @@ def plot_figure1d(data_table, saving_path, name, saving_formats):
                              'auditory_std': 'Auditory std',
                              'whisker_std': 'Whisker std',
                              'catch_std': 'Catch std'}, inplace=True)
-    df_to_latex(df=stats_df, filename=os.path.join(saving_path, 'Figure1D_table.tex'), caption='Figure1D', label='')
     save_table(df=stats_df, saving_path=saving_path, name='Figure1D_table', format=['csv'])

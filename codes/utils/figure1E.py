@@ -86,4 +86,3 @@ def plot_figure1e(data_table, saving_path, name, saving_formats):
                              'catch_std': 'Catch std'}, inplace=True)
 
     save_table(df=stats_df, saving_path=saving_path, name='Figure1E_table', format=['csv'])
-    df_to_latex(df=stats_df, filename=os.path.join(saving_path, 'Figure1E_table.tex'), caption='Figure1E', label='')

@@ -550,7 +550,7 @@ def plot_figure1k(load_dir: Path, saving_path: Path, name: str = 'Figure1K', sav
 
     saving_path = Path(saving_path)
     saving_path.mkdir(exist_ok=True, parents=True)
-    save_fig_name = saving_path / name
+    save_fig_name = saving_path / 'Figure1K'
     for ext in saving_formats:
         fig.savefig(save_fig_name.with_suffix(f'.{ext}'), dpi=300)
 

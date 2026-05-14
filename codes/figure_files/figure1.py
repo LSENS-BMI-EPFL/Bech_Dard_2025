@@ -1,5 +1,12 @@
 ﻿import os
+import gc
+gc.collect()
 import pandas as pd
+import pathlib
+import platform
+if platform.system() == 'Windows':
+    pathlib.PosixPath = pathlib.WindowsPath
+
 from codes.utils import figure1B, figure1C, figure1D, figure1E, figure1FG, figure1H, figure1IJ, figure1KL
 
 # Get main data and saving dir
@@ -47,12 +54,12 @@ table_path = os.path.join(main_dir, 'data', 'figure1', '1H')
 df = pd.read_csv(os.path.join(table_path, 'whisker_transitions_table.csv'), index_col=0)
 figure1H.plot_figure1h(data_table=df, saving_path=fig_folder, name='Figure1H', saving_formats=['png', 'svg'])
 
-
 # 1IJ
-dset_list = ['dlc_jrgeco', 'dlc_gcamp', 'dlc_controls_tdtomato', 'dlc_controls_gfp']
+dset_list = ['dlc_jrGECO', 'dlc_gcamp', 'dlc_tomato', 'dlc_GFP']
 side_dlc_list = []
 top_dlc_list = []
 data_path = os.path.join(main_dir, 'data', 'figure1', '1IJ')
+print('Aggregate data')
 for dset in dset_list:
     sub_data_path = os.path.join(data_path, dset)
     side_dlc = pd.read_csv(os.path.join(sub_data_path, 'uncentered_side_dlc_results.csv'))
@@ -77,4 +84,3 @@ figure1KL.plot_figure1k(load_dir=data_path, saving_path=fig_folder, name='Figure
 
 # 1L
 figure1KL.plot_figure1l(load_dir=data_path, saving_path=fig_folder, name='Figure1L', saving_formats=['png', 'svg'])
-

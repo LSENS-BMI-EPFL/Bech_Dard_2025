@@ -74,5 +74,4 @@ def plot_figure1h(data_table, saving_path, name, saving_formats):
     stats_df.rename(columns={'lick_flag': 'P (lick)',
                              'transition': 'Transition',
                              'time_bin': 'Time bin'}, inplace=True)
-    df_to_latex(df=stats_df, filename=os.path.join(saving_path, 'Figure1H_table.tex'), caption='Figure1H', label='')
     save_table(stats_df, saving_path, f'{name}_stat_results', format=['csv'])

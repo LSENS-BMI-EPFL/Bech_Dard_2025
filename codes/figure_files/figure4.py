@@ -13,9 +13,9 @@ if not os.path.exists(fig_folder):
 
 
 # 4A-B
-# data = pd.read_json(os.path.join(main_dir, 'data', 'figure4', '4AB', 'combined_avg_correlation_results.json'))
-# data['value'] = data.value.apply(lambda x: np.asarray(x, dtype=float))
-# figure4A_B.main(data, output_path=fig_folder)
+data = pd.read_json(os.path.join(main_dir, 'data', 'figure4', '4AB', 'combined_avg_correlation_results.json'))
+data['value'] = data.value.apply(lambda x: np.asarray(x, dtype=float))
+figure4A_B.main(data, output_path=fig_folder)
 
 # 4C-G
 data_path_4C = os.path.join(main_dir, 'data', 'figure4', '4C')

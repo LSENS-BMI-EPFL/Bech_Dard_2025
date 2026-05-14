@@ -47,8 +47,6 @@ def plot_figure1fg(data_table, saving_path, name, saving_formats):
     avg_data_table['Transition'] = avg_data_table['Transition'].replace(rename_dict)
     avg_data_table['N'] = len(data_table.Mouse_ID.unique())
     avg_data_table.rename(columns={'Whisker_trial': 'Whisker trial index'}, inplace=True)
-    df_to_latex(df=avg_data_table, filename=os.path.join(saving_path, 'Figure1F_table.tex'),
-                caption='Figure1F', label='')
     save_table(avg_data_table, saving_path, f'{name}_results', format=['csv'])
 
     # Statistics:
@@ -92,8 +90,3 @@ def plot_figure1fg(data_table, saving_path, name, saving_formats):
     }
     stats_table = pd.DataFrame.from_dict(stats_dict)
     save_table(stats_table, saving_path, f'{name}_stat_results', format=['csv'])
-
-    # Convert to LaTeX with booktabs and improved names
-    df_to_latex(df=stats_table, filename=os.path.join(saving_path, 'Figure1G_table.tex'),
-                caption='Figure1G', label='', form={col: lambda x: f"${x:.2e}$" for col in ['p', 'pcorr']})
-

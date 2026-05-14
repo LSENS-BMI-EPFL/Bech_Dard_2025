@@ -73,7 +73,6 @@ def plot_figure1c(data_table, saving_path, name, saving_formats):
                              'auditory_std': 'Auditory std',
                              'whisker_std': 'Whisker std',
                              'catch_std': 'Catch std'}, inplace=True)
-    df_to_latex(df=stats_df, filename=os.path.join(saving_path, 'Figure1C_table.tex'), caption='Figure1C', label='')
     save_table(df=stats_df, saving_path=saving_path, name='Figure1C_table', format=['csv'])
 
     # Test for difference in catch trials
@@ -93,9 +92,6 @@ def plot_figure1c(data_table, saving_path, name, saving_formats):
                                  'p': [p]})
     pd.set_option("display.float_format", "{:.2e}".format)
     save_table(df=cath_stat_df, saving_path=saving_path, name='Figure1C_catch_stats_table', format=['csv'])
-    df_to_latex(df=cath_stat_df, filename=os.path.join(saving_path, 'Figure1C_catch_table.tex'),
-                form={col: lambda x: f"${x:.2e}$" for col in ['p']},
-                caption='Figure1C', label='')
 
     # Average auditory hit rate independently of W+ / W-
     aud_hr_table = data_table.drop(['session_id', 'context', 'context_rwd_str'], axis=1)
@@ -106,5 +102,3 @@ def plot_figure1c(data_table, saving_path, name, saving_formats):
                                 'Auditory std': [aud_hr_std],
                                 'N': [len(aud_hr_table['outcome_a'])]})
     save_table(df=auditory_df, saving_path=saving_path, name='Figure1C_auditory_gran_average_table', format=['csv'])
-    df_to_latex(df=auditory_df, filename=os.path.join(saving_path, 'Figure1C_auditory_gran_average_table.tex'),
-                caption='Figure1C', label='')
