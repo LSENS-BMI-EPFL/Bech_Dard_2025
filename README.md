@@ -1,7 +1,7 @@
 # **Bech & Dard Figure panels reproduction**
 This repository allows the reproduction of figure panels in Bech, Dard et al. eLife (2026), starting from intermediate dataset.
 
-Intermediate dataset can be downloaded from [zenodo](zenodo) or generated starting from NWB files using [process NWB](https://github.com/LSENS-BMI-EPFL/Bech_Dard_process_NWB).
+Intermediate dataset can be downloaded from [zenodo](https://zenodo.org/communities/petersen-lab-data) or generated starting from NWB files using [process NWB](https://github.com/LSENS-BMI-EPFL/Bech_Dard_process_NWB).
 
 ## How to use
 
@@ -13,7 +13,7 @@ conda env create -f bech_dard_plot_environment.yml
 conda activate bech_dard_plot
 ```
 
-**2. Clone the repo or download source code, then download the processed data folder from [Zenodo](zenodo)**
+**2. Clone the repo or download source code, then download the processed data folder from [Zenodo](https://zenodo.org/communities/petersen-lab-data)**
 
 Place them so the folder structure looks like this:
 
@@ -46,4 +46,16 @@ cd path/to/Bech_Dard_plot_figures
 python -m codes.figure_files.figure1
 python -m codes.figure_files.figure1_supp1
 python -m codes.figure_files.figure1_supp2
+python -m codes.figure_files.figure1_supp3
+python -m codes.figure_files.figure2
+python -m codes.figure_files.figure2_supp1
+python -m codes.figure_files.figure2_supp2
+python -m codes.figure_files.figure2_supp3
+python -m codes.figure_files.figure3
+python -m codes.figure_files.figure3_supp1
+python -m codes.figure_files.figure3_supp2
+python -m codes.figure_files.figure3_supp3
+python -m codes.figure_files.figure3_supp4
+python -m codes.figure_files.figure3_supp5
+python -m codes.figure_files.figure4
 ```
