@@ -22,7 +22,7 @@ Bech_Dard_plot_figures/   ← your folder name (user choice, adjust cd below acc
 ├── codes/                ← source code (cloned / downloaded from this repo)
 │   ├── figure_files/
 │   └── utils/
-├── data/                 ← downloaded from Zenodo / generated using Bech_Dard_process_NWB (in that case rename 'published_data' in 'data')
+├── data/                 ← downloaded from Zenodo / generated with Bech_Dard_process_NWB (keep the name 'data')
 │   ├── figure1/
 │   ├── figure1_supp/
 │   ├── figure2/
