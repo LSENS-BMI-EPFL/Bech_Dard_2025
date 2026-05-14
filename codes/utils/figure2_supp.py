@@ -3,6 +3,7 @@ import json
 import ast
 import itertools
 import scipy
+import glob
 from codes.utils.misc.stats import *
 import matplotlib.pyplot as plt
 from codes.utils.misc.plot_on_grid import plot_grid_on_allen
@@ -84,8 +85,8 @@ def plot_figure2_supp1de(data_table, saving_path, saving_formats):
 
 def plot_figure2_supp2abc(muscimol, ringer, saving_path, sites, names, saving_formats):
     for idx, site in enumerate(sites):
-        muscimol_path = os.path.join(muscimol, f'{site}_Average mice behavior', 'context_days_full_table.csv')
-        ringer_path = os.path.join(ringer, f'{site}_general_average_across_days.csv')
+        muscimol_path = glob.glob(os.path.join(muscimol, site, '*', 'context_days_full_table.csv'))[0]
+        ringer_path = glob.glob(os.path.join(ringer, site, '*', 'context_days_full_table.csv'))[0]
         muscimol_df = pd.read_csv(muscimol_path)
         ringer_df = pd.read_csv(ringer_path)
 
@@ -327,7 +328,7 @@ def plot_figure2_supp3c(data_table, saving_path, name, saving_formats):
 def figure2supp_dplick_barplots(data_table, saving_path, name, saving_formats):
     df_sel = data_table.loc[data_table.trial_type == 'whisker_trial']
 
-    cols = ['index', 'opto_grid_ml', 'opto_grid_ap', 'data_mean_sub', 'context', 'trial_type', 'mouse_name']
+    cols = ['index', 'opto_grid_ml', 'opto_grid_ap', 'data_mean_sub', 'context', 'trial_type', 'mouse_id']
     df_sel = df_sel[cols].reset_index(drop=True)
 
     df_sel['coord'] = '(' + df_sel['opto_grid_ap'].astype(str) + ', ' + df_sel['opto_grid_ml'].astype(str) + ')'

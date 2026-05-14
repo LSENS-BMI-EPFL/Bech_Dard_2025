@@ -9,7 +9,7 @@ fig_folder = os.path.join(main_dir, 'figures', 'supplementary', 'figure3_supp4')
 if not os.path.exists(fig_folder):
     os.makedirs(fig_folder)
 
-dset_list = ['dlc_jrgeco', 'dlc_gcamp', 'dlc_controls_tdtomato', 'dlc_controls_gfp']
+dset_list = ['dlc_jrGECO', 'dlc_gcamp', 'dlc_tomato', 'dlc_GFP']
 fig_name = 'Figure3_supp4'
 side_dlc_list = []
 top_dlc_list = []

@@ -866,13 +866,13 @@ def main(data, output_path):
         lambda x: np.nanmean(np.array(x.tolist()),axis=0)).reset_index()
 
     # plot total avg
-    # for roi in ['(-1.5, 0.5)', '(-1.5, 3.5)', '(-1.5, 4.5)', '(1.5, 3.5)', '(0.5, 4.5)', '(1.5, 1.5)', '(2.5, 2.5)']:
-    #
-    #     print(f"Plotting total averages for roi {roi}")
-    #     save_path = os.path.join(output_path, 'figure4_supp1', 'figure4_supp1_A', roi)
-    #     if not os.path.exists(save_path):
-    #         os.makedirs(save_path)
-    #     Figure4_supp1_A(total_avg.loc[total_avg.correct_trial==1], roi, save_path)
+    for roi in ['(-1.5, 0.5)', '(-1.5, 3.5)', '(-1.5, 4.5)', '(1.5, 3.5)', '(0.5, 4.5)', '(1.5, 1.5)', '(2.5, 2.5)']:
+
+        print(f"Plotting total averages for roi {roi}")
+        save_path = os.path.join(output_path, 'figure4_supp1', 'figure4_supp1_A', roi)
+        if not os.path.exists(save_path):
+            os.makedirs(save_path)
+        Figure4_supp1_A(total_avg.loc[total_avg.correct_trial==1], roi, save_path)
 
     Figure4_supp1_B_C(mouse_avg, output_path)
     Figure4_B(total_avg, os.path.join(output_path, 'figure4A_B'))

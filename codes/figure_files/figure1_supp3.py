@@ -1,5 +1,11 @@
 ﻿import os
-from pathlib import Path
+import warnings
+warnings.filterwarnings("ignore")
+import pathlib
+import platform
+if platform.system() == 'Windows':
+    pathlib.PosixPath = pathlib.WindowsPath
+
 from codes.utils import figure1_supp3
 
 # Get main data and saving dir

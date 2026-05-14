@@ -1,9 +1,11 @@
-import os.path
-
+import os
 import ast
-import numpy as np
-import matplotlib.pyplot as plt
 import seaborn as sns
+import matplotlib.pyplot as plt
+import warnings
+warnings.filterwarnings("ignore")
+
+
 from codes.utils.misc.stats import psth_context_stats
 from codes.utils.misc.fig_saving import save_fig
 from codes.utils.misc.table_saving import save_table
@@ -40,7 +42,10 @@ def figure3f_psth(table, saving_path, name, formats=['png']):
 
     # Do the stats W+ vs W-
     stat_results = psth_context_stats(df=data_to_plot, grid_spot=selected_spots)
-    save_table(df=stat_results, saving_path=saving_path, name=f'{name}_stats')
+    main_dir = os.path.abspath(os.path.join(os.path.dirname(saving_path), ".."))
+    stats_save_path = os.path.join(main_dir, 'data', 'figure3', '3H')
+    os.makedirs(stats_save_path, exist_ok=True)
+    save_table(df=stat_results, saving_path=stats_save_path, name=f'{name}_stats')
 
     # Plot PSTHs activity
     fig, axes = plt.subplots(2, 3, sharex=True, sharey=True, figsize=(4, 6))

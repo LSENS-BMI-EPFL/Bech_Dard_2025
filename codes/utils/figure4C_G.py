@@ -48,12 +48,12 @@ def load_opto_data(opto_result_path):
     single_mouse_result_files = glob.glob(os.path.join(opto_result_path, "*", "opto_data.json"))
     mice=[]
     for file in single_mouse_result_files:
-        mice += [file.split("\\")[-2]]
+        mice += [os.path.basename(os.path.dirname(file))]
 
     opto_df = []
     for file in single_mouse_result_files:
         d= pd.read_json(file)
-        d['mouse_id'] = [file.split("\\")[-2] for i in range(d.shape[0])]
+        d['mouse_id'] = [os.path.basename(os.path.dirname(file)) for i in range(d.shape[0])]
         opto_df += [d]
     opto_df = pd.concat(opto_df)
     opto_df = opto_df.loc[opto_df.opto_grid_ap!=3.5]
@@ -109,7 +109,7 @@ def Figure4_supp2_A(data_path, result_path):
     for loc in ["(-1.5, 3.5)", "(1.5, 1.5)"]:
         print(loc)
         im_seq = avg.loc[(avg.context==1) & (avg.trial_type=='whisker_trial') & (avg.opto_stim_coord==loc), 'wf_image_sub'].to_numpy()[0]
-        save_path = os.path.join(result_path, 'Figure4_supp2_images', f"{name_dict[loc]}_stim")
+        save_path = os.path.join(result_path, f"{name_dict[loc]}_stim")
         if not os.path.exists(save_path):
             os.makedirs(save_path)
 
@@ -209,7 +209,7 @@ def Figure4_D_Figure4_supp2_D(control_df, pc_df, result_path):
 
     fig2.savefig(os.path.join(result_path, 'figure4C_G', f"Figure4_D.png"))
     fig2.savefig(os.path.join(result_path, 'figure4C_G', f"Figure4_D.svg"))
-
+    plt.close('all')
 
 def compute_angle_stim_lick(control_df, pc_df, result_path):
 
@@ -299,6 +299,7 @@ def Figure4_E(angle_df, result_path):
     fig.tight_layout()
     fig.savefig(os.path.join(save_path, f"Figure4_E.png"))
     fig.savefig(os.path.join(save_path, f"Figure4_E.svg"))
+    plt.close('all')
 
 
 def Figure4_F_G_correlations(opto_df, angle_df, result_path):
@@ -323,7 +324,7 @@ def Figure4_F_G_correlations(opto_df, angle_df, result_path):
     avg_opto_df = opto_df.loc[opto_df.trial_type=='whisker_trial'].drop(
         columns=['mouse_id', 'index', 'opto_grid_ml', 'opto_grid_ap', 'shuffle_mean', 'shuffle_std', 'context_background',
        'shuffle_mean_sub', 'shuffle_std_sub', 'shuffle_dist', 'shuffle_dist_sub', 'data_mean', 'percentile',
-       'percentile_sub', 'n_sigma', 'n_sigma_sub', 'p', 'p_corr', 'p_sub', 'p_corr_sub', 'opto_grid_ml_wf', 'opto_grid_ap_wf', 'trial_type',]).groupby(
+       'percentile_sub', 'n_sigma', 'n_sigma_sub', 'p', 'p_corr', 'p_sub', 'p_corr_sub', 'trial_type',]).groupby(
         by=['context', 'opto_stim_coord'], as_index=False, sort=False).agg('mean')
 
     for pc in ['PC 3']:
@@ -349,6 +350,7 @@ def Figure4_F_G_correlations(opto_df, angle_df, result_path):
             ax[i].spines[['right', 'top']].set_visible(False)
         fig.savefig(os.path.join(save_path, f'Figure4_F_G_right.png'))
         fig.savefig(os.path.join(save_path, f'Figure4_F_G_right.svg'))
+        plt.close('all')
 
 
 def Figure4_F_G_map(avg_angle_df, result_path):
@@ -357,13 +359,14 @@ def Figure4_F_G_map(avg_angle_df, result_path):
         os.makedirs(save_path)
     
     for name, group in avg_angle_df.groupby('context'):
-        for pc in ['PC 1', 'PC 2', 'PC 3']:
+        for pc in ['PC 3']:
             fig, ax = plt.subplots(figsize=(4,4))
             im_df = generate_reduced_image_df(group.loc[group.pc==pc, 'angle_lick'].to_numpy()[np.newaxis, :], [eval(coord) for coord in group.loc[group.pc==pc, 'opto_stim_coord']])
             im_df = im_df.rename(columns={'dff0': 'angle'})
             plot_grid_on_allen(im_df, outcome='angle', palette='viridis', facecolor=None, edgecolor=None, dotsize=440, result_path=None, vmin=0, vmax=10, fig=fig, ax=ax)
             ax.set_axis_off()
             fig.savefig(os.path.join(save_path, f'Figure4_{"F" if name=="rewarded" else "G"}_left.png'), dpi=400)
+            plt.close('all')
 
 
 def Figure4_supp2_BC(pca, result_path):
@@ -407,6 +410,7 @@ def Figure4_supp2_BC(pca, result_path):
         ax.flat[i].set_axis_off()
         ax.flat[i].set_title(f"PC {i+1}")
     fig.savefig(os.path.join(result_path, f"Figure4_supp2_C.png"))
+    plt.close('all')
 
 
 def enforce_sign_consistency(pca, reference_feature_idx=9):
@@ -524,20 +528,21 @@ def Figure4_DG_supp2_BD(data_path, opto_data_path, output_path):
     Figure4_D_Figure4_supp2_D(control_df, pc_df[pc_df.opto_stim_coord!="(-5.0, 5.0)"], output_path)
 
     angle_df = compute_angle_stim_lick(control_df, pc_df[pc_df.opto_stim_coord!="(-5.0, 5.0)"], output_path)
-    Figure4_E(angle_df, os.path.join(output_path, 'figureC_G'))
+    Figure4_E(angle_df, os.path.join(output_path, 'figure4C_G'))
 
     avg_angle_df = angle_df.drop(columns='mouse_id').groupby(by=['pc', 'context', 'opto_stim_coord'], as_index=False, sort=False).agg('mean')
-    Figure4_F_G_map(avg_angle_df, os.path.join(output_path, 'figureC_G'))
-    Figure4_F_G_correlations(opto_df, angle_df, os.path.join(output_path, 'figureC_G'))
+    Figure4_F_G_map(avg_angle_df, os.path.join(output_path, 'figure4C_G'))
+    Figure4_F_G_correlations(opto_df, angle_df, os.path.join(output_path, 'figure4C_G'))
 
 
 def main(data_path_4C, data_path_4DG, data_path_4_supp, opto_data_path, output_path):
 
     if not os.path.exists(os.path.join(output_path, 'figure4C_G')):
-        os.makedirs(os.path.join(output_path, 'figureC_G'), exist_ok=True)
+        os.makedirs(os.path.join(output_path, 'figure4C_G'), exist_ok=True)
         os.makedirs(os.path.join(output_path, 'figure4_supp2'), exist_ok=True)
 
     Figure4C(data_path_4C, os.path.join(output_path, 'figure4C_G'))
     Figure4_supp2_A(data_path_4_supp, os.path.join(output_path, 'figure4_supp2', '2A'))
 
     Figure4_DG_supp2_BD(data_path=data_path_4DG, opto_data_path=opto_data_path, output_path=output_path)
+

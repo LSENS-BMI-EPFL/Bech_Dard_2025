@@ -1,0 +1,10 @@
+name: bech_dard_plot
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.11
+  - graphviz
+  - pip
+  - pip:
+    - -r bech_dard_plot_requirements.txt

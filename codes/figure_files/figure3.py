@@ -12,7 +12,7 @@ if not os.path.exists(fig_folder):
 
 
 # 3B
-dset_list = ['dlc_jrgeco', 'dlc_gcamp', 'dlc_controls_tdtomato', 'dlc_controls_gfp']
+dset_list = ['dlc_jrGECO', 'dlc_gcamp', 'dlc_tomato', 'dlc_GFP']
 side_dlc_list = []
 top_dlc_list = []
 data_path = os.path.join(main_dir, 'data', 'figure3', '3BC')

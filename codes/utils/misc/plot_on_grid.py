@@ -82,6 +82,7 @@ def plot_grid_on_allen(grid, outcome, palette, facecolor, edgecolor, result_path
     grid['ml_wf'] = bregma[0] - grid['x'] * scalebar
     grid['ap_wf'] = bregma[1] - grid['y'] * scalebar
 
+    grid = grid.loc[~(grid.y == 3.5)]
     grid = grid.loc[~(((grid.x == 5.5) & (grid.y == 1.5)) | ((grid.x == 4.5) & (grid.y == 2.5)))]
 
     single_frame = np.rot90(rescale(np.ones([125, 160]), scale, anti_aliasing=False))
@@ -134,13 +135,13 @@ def get_wf_scalebar(scale=1, plot=False, savepath=None):
 
 
 def get_allen_ccf(bregma=(528, 315),
-                  root=os.path.join(os.path.abspath(os.path.join(os.getcwd(), "..", "..")),
+                  root=os.path.join(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..")),
                                     'data', 'utils', 'Allen_brain')):
 
     # All images aligned to 240,175 at widefield video alignment, after expanding image, goes to this. Set manually.
-    iso_mask = np.load(root + r"\allen_isocortex_tilted_500x640.npy")
-    atlas_mask = np.load(root + r"\allen_brain_tilted_500x640.npy")
-    bregma_coords = np.load(root + r"\allen_bregma_tilted_500x640.npy")
+    iso_mask = np.load(os.path.join(root, "allen_isocortex_tilted_500x640.npy"))
+    atlas_mask = np.load(os.path.join(root, "allen_brain_tilted_500x640.npy"))
+    bregma_coords = np.load(os.path.join(root, "allen_bregma_tilted_500x640.npy"))
 
     displacement_x = int(bregma[0] - np.round(bregma_coords[0] + 20))
     displacement_y = int(bregma[1] - np.round(bregma_coords[1]))

@@ -5,8 +5,9 @@ import warnings
 warnings.filterwarnings("ignore")
 from codes.utils import figure4A_B, figure4C_G
 
+
 # Get main data and saving dir
-main_dir = os.path.abspath(os.path.join(os.path.dirname(__file__)))
+main_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
 fig_folder = os.path.join(main_dir, 'figures', 'figure4')
 if not os.path.exists(fig_folder):
     os.makedirs(fig_folder)
@@ -21,6 +22,6 @@ figure4A_B.main(data, output_path=fig_folder)
 figure4C_G.main(data_path_4C = os.path.join(main_dir, 'data', 'figure4', '4C', 'avg_wf_image_sub.pkl'),
                 data_path_4DG = os.path.join(main_dir, 'data', 'figure4', '4DG', 'VGAT'),
                 data_path_4_supp = os.path.join(main_dir, 'data', 'figure4_supp', '2A', 'avg_wf_image_sub.pkl'),
-                opto_data_path= os.path.join(main_dir, 'data', 'figure2', '2CDE', 'VGAT'),
+                opto_data_path= os.path.join(main_dir, 'data', 'figure2', '2CDE'),
                 output_path=fig_folder)
 

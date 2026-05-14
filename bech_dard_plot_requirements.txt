@@ -1,0 +1,16 @@
+numpy>=2.0
+pyarrow
+pandas
+openpyxl
+scipy
+matplotlib
+seaborn
+scikit-learn
+scikit-image
+xgboost==3.0.2
+graphviz
+shap==0.47.0
+optuna
+joblib
+tqdm
+PyYAML
